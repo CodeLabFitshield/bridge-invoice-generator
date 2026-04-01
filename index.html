@@ -388,10 +388,6 @@
             margin-bottom: 3px;
         }
 
-        .billed-to-gst {
-            
-        }
-
         .trial-box {
             background: transparent;
             border: 1.5px solid #4CAF50;
@@ -619,11 +615,11 @@
             </div>
             <div class="header-stats">
                 <div>
-                    <div class="stat-value" id="itemCount">2</div>
+                    <div class="stat-value" id="itemCount">0</div>
                     <div class="stat-label">Items</div>
                 </div>
                 <div>
-                    <div class="stat-value" id="totalValue">₹90,582</div>
+                    <div class="stat-value" id="totalValue">₹0</div>
                     <div class="stat-label">Total</div>
                 </div>
             </div>
@@ -665,21 +661,21 @@
                 <div class="form-grid">
                     <div class="form-group">
                         <label>Client Name</label>
-                        <input type="text" id="clientName" value="La Qubical & Dosa Charcoal" onchange="updateSummary()">
+                        <input type="text" id="clientName" value="" onchange="updateSummary()">
                     </div>
                     <div class="form-group">
                         <label>Owner Name</label>
-                        <input type="text" id="ownerName" value="La Qubical & Dosa Charcoal" onchange="updateSummary()">
+                        <input type="text" id="ownerName" value="" onchange="updateSummary()">
                     </div>
                     <div class="form-group">
                         <label>GST Number</label>
-                        <input type="text" id="gstNumber" value="24AAACF1234A1Z5" onchange="updateSummary()">
+                        <input type="text" id="gstNumber" value="" onchange="updateSummary()">
                     </div>
                 </div>
                 <div class="form-grid" style="margin-top: 16px;">
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label>Address</label>
-                        <textarea id="clientAddress" onchange="updateSummary()">Ahmedabad, Gujarat -- 380001</textarea>
+                        <textarea id="clientAddress" onchange="updateSummary()"></textarea>
                     </div>
                 </div>
             </div>
@@ -699,15 +695,15 @@
                 <div class="summary-grid">
                     <div class="summary-row">
                         <span>Subtotal:</span>
-                        <span id="summarySubtotal">₹76,764</span>
+                        <span id="summarySubtotal">₹0</span>
                     </div>
                     <div class="summary-row">
                         <span>GST @ 18%:</span>
-                        <span id="summaryGST">₹13,818</span>
+                        <span id="summaryGST">₹0</span>
                     </div>
                     <div class="summary-row total">
                         <span>Grand Total:</span>
-                        <span id="summaryTotal">₹90,582</span>
+                        <span id="summaryTotal">₹0</span>
                     </div>
                 </div>
             </div>
@@ -765,32 +761,11 @@
             return `${dueDate.getDate()} ${months[dueDate.getMonth()]} ${dueDate.getFullYear()}`;
         }
 
-        let items = [
-            {
-                id: 1,
-                restaurant: 'La Qubical',
-                type: 'Standalone Restaurant',
-                branches: 1,
-                plan: 'Standard',
-                price12m: 1499,
-                discount: 0,
-                trial: false,
-            },
-            {
-                id: 2,
-                restaurant: 'Dosa Charcoal',
-                type: 'Multi-Branch Chain',
-                branches: 6,
-                plan: 'Standard',
-                price12m: 1350,
-                discount: 10,
-                trial: true,
-            },
-        ];
+        let items = [];
 
         const planPricing = {
-            Standard: { 12: 1499 },
-            Pro: { 12: 2499 },
+            Standard: { 6: 1999, 12: 1499 },
+            Pro: { 6: 3499, 12: 2499 },
         };
 
         function formatCurrency(num) {
@@ -800,7 +775,9 @@
         function calculateTotals() {
             let subtotal = 0;
             items.forEach((item) => {
-                let itemTotal = item.price12m * 12 * item.branches;
+                const months = item.term === '6m' ? 6 : 12;
+                const price = item.term === '6m' ? item.price6m : item.price12m;
+                let itemTotal = price * months * item.branches;
                 if (item.discount > 0) {
                     itemTotal = itemTotal * (1 - item.discount / 100);
                 }
@@ -834,6 +811,17 @@
                                 <option value="Standard" ${item.plan === 'Standard' ? 'selected' : ''}>Standard</option>
                                 <option value="Pro" ${item.plan === 'Pro' ? 'selected' : ''}>Pro</option>
                             </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Payment Term</label>
+                            <select onchange="updateItem(${item.id}, 'term', this.value)">
+                                <option value="6m" ${item.term === '6m' ? 'selected' : ''}>6 Months</option>
+                                <option value="12m" ${item.term === '12m' ? 'selected' : ''}>12 Months</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>6M Price (₹/month)</label>
+                            <input type="number" value="${item.price6m}" onchange="updateItem(${item.id}, 'price6m', parseInt(this.value) || 0)">
                         </div>
                         <div class="form-group">
                             <label>12M Price (₹/month)</label>
@@ -882,7 +870,9 @@
                 type: 'Standalone Restaurant',
                 branches: 1,
                 plan: 'Standard',
+                price6m: 1999,
                 price12m: 1499,
+                term: '12m',
                 discount: 0,
                 trial: false,
             });
@@ -933,9 +923,9 @@
                 : 'SUBSCRIPTION DETAILS --- STANDARD PLAN';
 
             const tableRows = items.map((item) => {
+                const rate6m = item.price6m;
                 const rate12m = item.price12m;
-                const rate6m = Math.ceil(rate12m * 1.35);
-                const total6m = rate6m * 6 * item.branches;
+                const total6m = rate6m * 6 * item.branches * (1 - item.discount / 100);
                 const total12m = rate12m * 12 * item.branches * (1 - item.discount / 100);
 
                 return `
@@ -1093,28 +1083,7 @@
             document.getElementById('gstNumber').value = '';
             document.getElementById('clientAddress').value = '';
             
-            items = [
-                {
-                    id: 1,
-                    restaurant: 'La Qubical',
-                    type: 'Standalone Restaurant',
-                    branches: 1,
-                    plan: 'Standard',
-                    price12m: 1499,
-                    discount: 0,
-                    trial: false,
-                },
-                {
-                    id: 2,
-                    restaurant: 'Dosa Charcoal',
-                    type: 'Multi-Branch Chain',
-                    branches: 6,
-                    plan: 'Standard',
-                    price12m: 1350,
-                    discount: 10,
-                    trial: true,
-                },
-            ];
+            items = [];
             
             renderItems();
             updateSummary();
