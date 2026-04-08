@@ -114,18 +114,6 @@ const BridgeInvoiceGenerator = () => {
     return '₹' + Math.round(num).toLocaleString('en-IN');
   };
 
-  // Download PDF
-  const downloadPDF = async () => {
-    const element = invoiceRef.current;
-    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const imgWidth = 210;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-    pdf.save(`BRIDGE_Invoice_${invoiceNo.replace(/\//g, '-')}.pdf`);
-  };
-
   return (
     <div style={styles.container}>
       <style>{globalStyles}</style>
@@ -401,7 +389,7 @@ const BridgeInvoiceGenerator = () => {
               <button style={styles.previewButton} onClick={() => setActiveTab('preview')}>
                 Preview Invoice →
               </button>
-              <button style={styles.downloadButton} onClick={downloadPDF}>
+              <button style={styles.downloadButton}>
                 ↓ Download PDF
               </button>
             </div>
@@ -417,7 +405,7 @@ const BridgeInvoiceGenerator = () => {
               <button style={styles.backButton} onClick={() => setActiveTab('form')}>
                 ← Back to Edit
               </button>
-              <button style={styles.downloadButton} onClick={downloadPDF}>
+              <button style={styles.downloadButton}>
                 ↓ Download PDF
               </button>
             </div>
@@ -654,8 +642,8 @@ const InvoiceTemplate = ({
               <div style={styles.invoiceSignatoryInfo}>BRIDGE --- Fitshield Health Tech Pvt. Ltd.</div>
               <div style={styles.invoiceSignatoryDate}>Date: {invoiceDate}</div>
               <div style={styles.invoiceFooterNote}>
-                <em>This is a computer-generated invoice.</em><br/>
-                <em>Terms: Payment due within 7 days of invoice date.</em><br/>
+                <em>This is a computer-generated invoice.</em><br />
+                <em>Terms: Payment due within 7 days of invoice date.</em><br />
                 <em>Prices in INR inclusive of applicable taxes.</em>
               </div>
             </td>

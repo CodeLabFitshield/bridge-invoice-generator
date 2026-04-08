@@ -1,1102 +1,2195 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BRIDGE Invoice Generator - Fitshield</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Arial", sans-serif;
+        background: linear-gradient(135deg, #f5f5f5 0%, #eeeeee 100%);
+        min-height: 100vh;
+        color: #333;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        color: white;
+        padding: 40px 30px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .header-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0px 30px;
+      }
+
+      .header-utilities {
+        display: flex;
+        align-items: center;
+        gap: 40px;
+      }
+
+      .logo-section {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .logo-text h1 {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+
+      .logo-text p {
+        font-size: 13px;
+        color: #aaa;
+      }
+
+      .header-stats {
+        display: flex;
+        gap: 40px;
+      }
+
+      .stat-value {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+
+      .stat-label {
+        font-size: 12px;
+        color: #aaa;
+      }
+
+      .tab-container {
+        background: white;
+        display: flex;
+        border-bottom: 2px solid #e0e0e0;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+
+      .tab-button {
+        padding: 16px 24px;
+        border: none;
+        background: none;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        color: #999;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s ease;
+      }
+
+      .tab-button.active {
+        color: #1a1a1a;
+        border-bottom-color: #1a1a1a;
+      }
+
+      .main-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 30px;
+      }
+
+      .form-section {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+
+      .card {
+        background: white;
+        padding: 24px;
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      }
+
+      .card-title {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: #1a1a1a;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .form-group label {
+        font-size: 12px;
+        font-weight: 500;
+        color: #666;
+        margin-bottom: 6px;
+      }
+
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        padding: 10px 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 13px;
+        font-family: inherit;
+      }
+
+      .form-group input[readonly] {
+        background: #f5f5f5;
+        cursor: not-allowed;
+      }
+
+      .form-group textarea {
+        resize: vertical;
+        min-height: 80px;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      .add-button {
+        padding: 8px 16px;
+        background: #1a1a1a;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 500;
+      }
+
+      .item-card {
+        background: #f8f8f8;
+        padding: 16px;
+        border-radius: 6px;
+        margin-bottom: 16px;
+        border: 1px solid #e0e0e0;
+      }
+
+      .item-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 16px;
+        margin-bottom: 12px;
+      }
+
+      .delete-button {
+        padding: 8px 16px;
+        background: #ff4444;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+      }
+
+      .summary-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .summary-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 14px;
+        padding: 8px 0;
+      }
+
+      .summary-row.total {
+        border-top: 2px solid #1a1a1a;
+        padding-top: 12px;
+        margin-top: 12px;
+        font-weight: bold;
+        font-size: 18px;
+      }
+
+      .final-price-highlight {
+        background: #fff3cd;
+        padding: 8px 12px;
+        border-radius: 4px;
+        color: #d9534f;
+        font-weight: bold;
+        margin-top: 12px;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 12px;
+      }
+
+      .action-buttons button {
+        flex: 1;
+        padding: 12px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .preview-button {
+        background: #f0f0f0;
+        border: 1px solid #ddd;
+        color: #1a1a1a;
+      }
+
+      .new-invoice-button {
+        background: #4caf50;
+        color: white;
+        border: none;
+      }
+
+      .preview-container {
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+        padding: 30px;
+      }
+
+      .preview-header {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 30px;
+      }
+
+      .back-button {
+        padding: 12px 20px;
+        background: #f0f0f0;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      .invoice-header {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+      }
+
+      .invoice-header-left {
+        font-size: 10px;
+      }
+
+      .invoice-brand {
+        font-size: 28px;
+        font-weight: 800;
+        letter-spacing: 2px;
+        margin-bottom: 4px;
+        color: #000;
+        font-family: "Montserrant", sans-serif;
+      }
+
+      .invoice-tagline {
+        font-size: 9px;
+        color: #666;
+        margin-bottom: 2px;
+      }
+
+      .invoice-company-name {
+        font-size: 10px;
+        font-weight: bold;
+        margin-top: 8px;
+      }
+
+      .invoice-company-details {
+        font-size: 9px;
+        line-height: 1.5;
+      }
+
+      .invoice-header-right {
+        text-align: right;
+      }
+
+      .invoice-title {
+        margin-bottom: 12px;
+        display: inline-block;
+        letter-spacing: 1px;
+        font-size: 22px;
+        font-weight: bold;
+        color: #1a8f3c;
+      }
+
+      .invoice-header-field {
+        font-size: 10px;
+        margin-bottom: 6px;
+      }
+
+      .invoice-header-label {
+        font-weight: bold;
+      }
+
+      .invoice-badge {
+        background: #1a5aa8;
+        color: white;
+        padding: 2px 12px;
+        border-radius: 12px;
+        font-size: 9px;
+        font-weight: bold;
+        display: inline-block;
+      }
+
+      .invoice-billed-to {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+      }
+
+      .billed-to-section-title {
+        font-weight: bold;
+        font-size: 9px;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+      }
+
+      .billed-to-name {
+        font-weight: bold;
+        font-size: 11px;
+        margin-bottom: 4px;
+      }
+
+      .billed-to-line {
+        font-size: 10px;
+        margin-bottom: 3px;
+        line-height: 1.4;
+      }
+
+      .trial-box {
+        text-align: center;
+        font-size: 9px;
+        color: #888888;
+      }
+
+      .trial-box-subtitle {
+        font-size: 9px;
+        color: #888888;
+      }
+
+      .section-title {
+        font-size: 10px;
+        color: #9e9e9e;
+        font-weight: 500;
+        margin-bottom: 18px;
+        text-transform: uppercase;
+      }
+
+      .subscription-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+        font-size: 9px;
+      }
+
+      .subscription-table th {
+        padding: 8px;
+        text-align: left;
+        font-weight: bold;
+        border: 1px solid #1a1a1a;
+      }
+
+      .subscription-table td {
+        padding: 8px;
+        border: 1px solid #1a1a1a;
+        font-size: 9px;
+      }
+
+      /* .subscription-table tbody tr:nth-child(odd) {
+      background: #f9f9f9;
+    } */
+
+      .subscription-table .number {
+        text-align: right;
+        font-family: "Courier New", monospace;
+      }
+
+      .restaurant-name {
+        font-weight: bold;
+        margin-bottom: 1px;
+      }
+
+      .restaurant-type {
+        font-size: 8px;
+        color: #666;
+        margin-bottom: 1px;
+      }
+
+      .discount-badge {
+        color: #d9534f;
+        font-weight: bold;
+        font-size: 8px;
+        margin-bottom: 1px;
+      }
+
+      .trial-badge {
+        color: #2196f3;
+        font-style: italic;
+        font-size: 8px;
+      }
+
+      /* .subtotal-row {
+      background: #f9f9f9;
+      font-weight: bold;
+    } */
+
+      .gst-row {
+        background: #ffebee;
+        font-weight: bold;
+        color: #d9534f;
+      }
+
+      .total-row {
+        background: #ededed;
+        color: #000;
+        font-weight: bold;
+      }
+
+      .features-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      .feature-box {
+        border: 1px solid #ddd;
+        padding: 12px;
+        border-radius: 4px;
+        font-size: 8px;
+      }
+
+      .feature-box.pro {
+        background: #e3f2fd;
+        border-color: #1a5aa8;
+      }
+
+      .feature-title {
+        font-weight: bold;
+        margin-bottom: 8px;
+        font-size: 9px;
+      }
+
+      .feature-badge {
+        background: #1a5aa8;
+        color: white;
+        padding: 1px 6px;
+        border-radius: 3px;
+        font-size: 7px;
+        font-weight: bold;
+        margin-left: 4px;
+      }
+
+      .feature-box ul {
+        margin: 0;
+        padding-left: 16px;
+        line-height: 1.6;
+      }
+
+      .payment-section {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 20px;
+        padding-top: 20px;
+        margin-top: 20px;
+        border-top: 1px solid #000;
+      }
+
+      .payment-left,
+      .payment-right {
+        font-size: 9px;
+      }
+
+      .payment-field {
+        margin-bottom: 6px;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .payment-label {
+        font-weight: bold;
+        min-width: 90px;
+      }
+
+      .payment-right {
+        text-align: right;
+      }
+
+      /* .signature-section {
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    } */
+
+      .signature-canvas {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        display: block;
+        margin: 10px 0;
+        background: white;
+        cursor: crosshair;
+        width: 100%;
+        max-width: 300px;
+        height: 100px;
+      }
+
+      .signature-buttons {
+        display: flex;
+        gap: 10px;
+        margin: 10px 0;
+      }
+
+      /* .signature-buttons button {
+      padding: 6px 12px;
+      border: 1px solid #ddd;
+      background: #f9f9f9;
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 12px;
+    } */
+
+      .notes-section {
+        background: #f9f9f9;
+        padding: 12px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+      }
+
+      .notes-section textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 13px;
+        font-family: inherit;
+        min-height: 80px;
+      }
+
+      .invoice-footer {
+        font-size: 8px;
+        color: #666;
+        margin-top: 20px;
+        padding-top: 12px;
+        border-top: 1px solid #ddd;
+      }
+
+      .generate-button {
+        padding: 12px 24px;
+        background: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      @media print {
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Arial', sans-serif;
-            background: linear-gradient(135deg, #f5f5f5 0%, #eeeeee 100%);
-            min-height: 100vh;
-            color: #333;
+          background: white;
         }
 
-        .header {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-            color: white;
-            padding: 40px 30px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .header-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo-section {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .logo-text h1 {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .logo-text p {
-            font-size: 13px;
-            color: #aaa;
-            display: flex;
-            flex-direction: row;
-            justify-content: flex-end;
-        }
-
-        .header-stats {
-            display: flex;
-            gap: 40px;
-        }
-
-        .stat-value {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            font-size: 12px;
-            color: #aaa;
-        }
-
-        .tab-container {
-            background: white;
-            display: flex;
-            border-bottom: 2px solid #e0e0e0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .tab-button {
-            padding: 16px 24px;
-            border: none;
-            background: none;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            color: #999;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s ease;
-        }
-
-        .tab-button.active {
-            color: #1a1a1a;
-            border-bottom-color: #1a1a1a;
-        }
-
-        .main-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 30px;
-        }
-
-        .form-section {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        .card {
-            background: white;
-            padding: 24px;
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-
-        .card-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: #1a1a1a;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-group label {
-            font-size: 12px;
-            font-weight: 500;
-            color: #666;
-            margin-bottom: 6px;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            padding: 10px 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 13px;
-            font-family: inherit;
-        }
-
-        .form-group input[readonly] {
-            background: #f5f5f5;
-            cursor: not-allowed;
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        .add-button {
-            padding: 8px 16px;
-            background: #1a1a1a;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-        }
-
-        .item-card {
-            background: #f8f8f8;
-            padding: 16px;
-            border-radius: 6px;
-            margin-bottom: 16px;
-            border: 1px solid #e0e0e0;
-        }
-
-        .item-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 16px;
-            margin-bottom: 12px;
-        }
-
-        .delete-button {
-            padding: 8px 16px;
-            background: #ff4444;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-
-        .summary-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .summary-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 14px;
-            padding: 8px 0;
-        }
-
-        .summary-row.total {
-            border-top: 2px solid #1a1a1a;
-            padding-top: 12px;
-            margin-top: 12px;
-            font-weight: bold;
-            font-size: 18px;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 12px;
-        }
-
-        .action-buttons button {
-            flex: 1;
-            padding: 12px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .preview-button {
-            background: #f0f0f0;
-            border: 1px solid #ddd;
-            color: #1a1a1a;
-        }
-
-        .download-button {
-            background: #1a1a1a;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 6px;
-        }
-
-        .new-invoice-button {
-            background: #4CAF50;
-            color: white;
-            border: none;
+        .header,
+        .tab-container,
+        .preview-header,
+        .signature-section {
+          display: none;
         }
 
         .preview-container {
-            background: white;
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
-            padding: 30px;
+          border: none;
+          padding: 0;
+          margin: 0;
+          box-shadow: none;
+        }
+      }
+
+      .invoice-footer {
+        margin-top: 30px;
+        font-size: 10px;
+        color: #555;
+      }
+
+      .invoice-pdf {
+        width: 200mm;
+        min-height: 290mm;
+        padding-top: 10mm;
+        padding-bottom: 10mm;
+        padding-right: 10mm;
+        padding-left: 5mm;
+        background: #fff;
+        font-family: Arial, sans-serif;
+        font-size: 11px;
+        color: #222;
+        box-sizing: border-box;
+        overflow: hidden;
+        margin: auto;
+      }
+
+      .invoice-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+      }
+
+      .invoice-brand {
+        font-size: 26px;
+        font-weight: bold;
+      }
+
+      .invoice-tagline {
+        color: #1fa64a;
+        font-weight: 500;
+        margin-top: 2px;
+        font-size: 12px;
+      }
+
+      .invoice-title {
+        font-size: 22px;
+        font-weight: bold;
+        color: #1a8f3c;
+      }
+
+      .green-line {
+        border-top: 1px solid #1a8f3c;
+        margin: 12px 0;
+      }
+
+      .invoice-billed-to {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 10px;
+      }
+
+      .trial-box {
+        text-align: right;
+        font-size: 10px;
+      }
+
+      .section-title {
+        font-weight: bold;
+        margin-top: 15px;
+        margin-bottom: 5px;
+      }
+
+      .subscription-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 8px;
+      }
+
+      .subscription-table td {
+        border: 1px solid #000;
+        padding: 6px;
+        font-size: 11px;
+      }
+
+      .plan-box {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        border: 1px solid #ccc;
+        margin-top: 15px;
+      }
+
+      .plan-box div {
+        padding: 10px;
+        font-size: 10px;
+      }
+
+      .qr-box {
+        margin-top: 10px;
+      }
+
+      .signature-box {
+        text-align: left;
+      }
+
+      .footer-text {
+        font-size: 9px;
+        margin-top: 20px;
+        color: #555;
+        font-style: italic;
+        font-weight: 300;
+      }
+
+      .invoice-company {
+        font-size: 12px;
+        font-weight: 700;
+        margin-top: 8px;
+      }
+
+      .invoice-gstin {
+        font-size: 10px;
+        color: #9e9e9e;
+        margin-top: 2px;
+        font-weight: 500;
+      }
+
+      .invoice-cin {
+        font-size: 10px;
+        color: #9e9e9e;
+        margin-top: 2px;
+        font-weight: 500;
+      }
+
+      .invoice-address {
+        font-size: 10px;
+        color: #9e9e9e;
+        margin-top: 2px;
+        font-weight: 500;
+      }
+
+      .invoice-contact {
+        font-size: 10px;
+        color: #9e9e9e;
+        margin-top: 2px;
+        font-weight: 500;
+      }
+
+      .invoice-no {
+        font-size: 10px;
+        color: #9e9e9e;
+        margin-bottom: 2px;
+        font-weight: 500;
+      }
+
+      .invoice-date {
+        font-size: 10px;
+        color: #9e9e9e;
+        margin-bottom: 2px;
+        font-weight: 500;
+      }
+
+      .invoice-due-date {
+        font-size: 10px;
+        color: #9e9e9e;
+        margin-bottom: 2px;
+        font-weight: 500;
+      }
+
+      .invoice-plan {
+        font-size: 10px;
+        color: #9e9e9e;
+        margin-bottom: 2px;
+        font-weight: 500;
+      }
+
+      .invoice-no-value {
+        font-weight: 700;
+        color: #000;
+      }
+
+      .invoice-date-value {
+        font-weight: 700;
+        color: #000;
+      }
+
+      .invoice-due-date-value {
+        font-weight: 700;
+        color: #000;
+      }
+
+      .invoice-plan-value {
+        font-weight: 700;
+        color: #1fa64a;
+      }
+
+      .invoice-billed-to-text {
+        font-size: 10px;
+        color: #888888;
+        margin-bottom: 10px;
+        font-weight: 700;
+      }
+
+      .invoice-billed-to-name {
+        font-size: 10px;
+        color: #9e9e9e;
+        margin-bottom: 2px;
+        font-weight: 500;
+      }
+
+      .invoice-gst-number {
+        font-size: 10px;
+        color: #9e9e9e;
+        margin-bottom: 2px;
+        font-weight: 500;
+      }
+
+      .invoice-billto-address {
+        font-size: 10px;
+        color: #9e9e9e;
+        margin-bottom: 2px;
+        font-weight: 500;
+      }
+
+      .invoice-trial-name {
+        font-size: 12px;
+        color: #1fa64a;
+        font-weight: 500;
+      }
+
+      .payment-details-label {
+        padding: 4px 10px 4px 0;
+        font-size: 10px;
+      }
+
+      .payment-details-value {
+        padding: 4px 0 4px 0;
+        font-size: 10px;
+        font-weight: 800;
+      }
+
+      /* ── Login page (moved from inline styles) ── */
+      .login-page {
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #f5f5f5;
+        padding: 16px;
+      }
+      .login-box {
+        background: white;
+        padding: 40px;
+        border-radius: 8px;
+        width: 100%;
+        max-width: 320px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+      }
+      .login-input {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+        font-family: inherit;
+      }
+      .login-button {
+        width: 100%;
+        padding: 12px;
+        background: #1a1a1a;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 14px;
+        cursor: pointer;
+        min-height: 44px;
+      }
+
+      /* ── Header logo ── */
+      .header-logo {
+        width: 200px;
+        height: auto;
+        flex-shrink: 0;
+      }
+
+      /* ── Logout button ── */
+      .logout-button {
+        padding: 8px 16px;
+        background: red;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 13px;
+        min-height: 44px;
+        white-space: nowrap;
+        display: inline-block;
+      }
+
+      .logout-button-2 {
+        color: red;
+        border: none;
+        background: transparent;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 24px;
+        white-space: nowrap;
+        display: none;
+      }
+
+      /* ── Invoice preview horizontal scroll wrapper ── */
+      .invoice-preview-scroll {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      /* ═══════════════════════════════════════════════
+         RESPONSIVE: Tablet landscape (≤ 1024px)
+         ═══════════════════════════════════════════════ */
+      @media (max-width: 1024px) {
+        .header {
+          padding: 24px 16px;
+        }
+        .header-content {
+          padding: 0 8px;
+          gap: 16px;
+        }
+        .header-utilities {
+          gap: 20px;
+        }
+        .header-stats {
+          gap: 20px;
+        }
+        .main-content {
+          padding: 20px;
+        }
+        .stat-value {
+          font-size: 20px;
+        }
+      }
+
+      /* ═══════════════════════════════════════════════
+         RESPONSIVE: Tablet portrait (≤ 768px)
+         ═══════════════════════════════════════════════ */
+      @media (max-width: 768px) {
+        .header {
+          padding: 20px 12px;
+        }
+        .header-content {
+          align-items: stretch;
+          gap: 16px;
+          padding: 0;
+        }
+        .logo-section {
+          justify-content: center;
+        }
+        .header-logo {
+          width: 120px;
+        }
+        .header-utilities {
+          gap: 24px;
+        }
+        .header-stats {
+          gap: 24px;
+        }
+        .stat-value {
+          font-size: 16px;
         }
 
-        .preview-header {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 30px;
+        /* Tabs */
+        .tab-container {
+          justify-content: stretch;
+        }
+        .tab-button {
+          flex: 1;
+          text-align: center;
+          padding: 14px 12px;
+          font-size: 13px;
         }
 
+        /* Main content */
+        .main-content {
+          padding: 16px;
+        }
+        .card {
+          padding: 16px;
+        }
+
+        /* Forms — force single column */
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+        .item-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        /* Buttons */
+        .action-buttons {
+          flex-direction: column;
+        }
+        .action-buttons button {
+          min-height: 44px;
+        }
+
+        /* Preview */
+        .preview-container {
+          padding: 16px;
+        }
+
+        /* Generate button */
+        .generate-button {
+          width: 100%;
+          min-height: 48px;
+        }
+
+        .logout-button-2 {
+          display: block;
+      }
+
+
+        .logout-button {
+          display: none;
+      }
+      }
+
+      /* ═══════════════════════════════════════════════
+         RESPONSIVE: Mobile (≤ 480px)
+         ═══════════════════════════════════════════════ */
+      @media (max-width: 480px) {
+        .header {
+          padding: 16px 10px;
+        }
+        .header-content {
+          gap: 12px;
+        }
+        .logo-section {
+          gap: 8px;
+        }
+        .header-logo {
+          width: 85px;
+        }
+        .logo-text h1 {
+          font-size: 18px;
+        }
+        .logo-text p {
+          font-size: 11px;
+        }
+        .header-utilities {
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 16px;
+        }
+        .header-stats {
+          gap: 16px;
+        }
+        .stat-value {
+          font-size: 14px;
+        }
+        .stat-label {
+          font-size: 11px;
+        }
+
+        /* Tabs */
+        .tab-button {
+          padding: 12px 8px;
+          font-size: 12px;
+        }
+
+        /* Main content */
+        .main-content {
+          padding: 12px;
+        }
+        .card {
+          padding: 12px;
+          border-radius: 6px;
+        }
+        .card-title {
+          font-size: 14px;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 10px;
+        }
+
+        /* Forms */
+        .form-grid {
+          grid-template-columns: 1fr;
+          gap: 12px;
+        }
+        .item-grid {
+          grid-template-columns: 1fr;
+          gap: 12px;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+          font-size: 16px;
+          padding: 12px;
+          min-height: 44px;
+        }
+
+        /* Buttons */
+        .add-button {
+          width: 100%;
+          min-height: 44px;
+          font-size: 14px;
+        }
+        .delete-button {
+          width: 100%;
+          min-height: 44px;
+          font-size: 13px;
+        }
+        .action-buttons button {
+          font-size: 14px;
+          min-height: 48px;
+        }
         .back-button {
-            flex: 1;
-            padding: 12px 20px;
-            background: #f0f0f0;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
+          width: 100%;
+          min-height: 44px;
+          text-align: center;
+        }
+        .preview-button,
+        .new-invoice-button {
+          width: 100%;
         }
 
-        .invoice-pdf {
-            background: white;
-            padding: 40px;
-            font-family: Arial, sans-serif;
-            font-size: 10px;
-            line-height: 1.6;
+        /* Login page */
+        .login-box {
+          padding: 24px 20px;
+          max-width: 100%;
         }
 
-        .invoice-header {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #4CAF50;
+        /* Summary */
+        .summary-row {
+          font-size: 13px;
+        }
+        .summary-row.total {
+          font-size: 16px;
         }
 
-        .invoice-header-left {
-            font-size: 10px;
+        /* Preview container */
+        .preview-container {
+          padding: 12px;
+          border-radius: 6px;
+        }
+        .preview-header {
+          margin-bottom: 16px;
         }
 
-        .invoice-brand {
-            font-size: 22px;
-            font-weight: bold;
-            letter-spacing: 2px;
-            margin-bottom: 4px;
+        /* Signature section */
+        .signature-section h3 {
+          font-size: 15px;
         }
 
-        .invoice-tagline {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 2px;
+        /* Generate button full width */
+        .generate-button {
+          width: 100%;
+          min-height: 48px;
+          font-size: 15px;
         }
 
-        .invoice-tagline-2 {
-            font-size: 12px;
-            color: #4CAF50;
-            margin-bottom: 2px;
+        /* Item card spacing */
+        .item-card {
+          padding: 12px;
+        }
+        .form-section {
+          gap: 16px;
         }
 
-        .invoice-company-name {
-            font-size: 10px;
-            font-weight: bold;
-            margin-top: 8px;
+        /* Logout button */
+        .logout-button {
+          padding: 8px 12px;
+          font-size: 12px;
+          display: none;
         }
 
-        .invoice-company-details {
-            font-size: 9px;
-            line-height: 1.5;
-        }
-
-        .invoice-header-right {
-            text-align: right;
-        }
-
-        .invoice-title {
-            font-weight: bold;
-            font-size: 14px;
-            background: #4CAF50;
-            color: white;
-            padding: 4px 16px;
-            margin-bottom: 12px;
-            display: inline-block;
-            letter-spacing: 1px;
-        }
-
-        .invoice-header-field {
-            font-size: 10px;
-            margin-bottom: 6px;
-        }
-
-        .invoice-header-label {
-            font-weight: bold;
-        }
-
-        .invoice-badge {
-            color: #4CAF50;
-            font-size:12px;
-            font-weight: bold;
-            display: inline-block;
-        }
-
-        .invoice-billed-to {
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 22px;
-        }
-
-        .billed-to-section-title {
-            font-weight: bold;
-            font-size: 9px;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-        }
-
-        .billed-to-name {
-            font-weight: bold;
-            font-size: 11px;
-            margin-bottom: 4px;
-        }
-
-        .billed-to-line {
-            font-size: 10px;
-            margin-bottom: 3px;
-        }
-
-        .trial-box {
-            background: transparent;
-            border: 1.5px solid #4CAF50;
-            border-radius: 6px;
-            padding: 12px 20px;
-            text-align: right;
-            font-size: 9px;
-        }
-
-        .trial-box-title {
-            font-weight: bold;
-            color: #1b5e20;
-            margin-bottom: 2px;
-        }
-
-        .trial-box-subtitle {
-            color: #2e7d32;
-            margin-bottom: 4px;
-        }
-
-        .section-title {
-            font-weight: bold;
-            font-size: 9px;
-            margin-bottom: 12px;
-            text-transform: uppercase;
-        }
-
-        .subscription-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-            font-size: 9px;
-        }
-
-        .subscription-table thead {
-            background: #1a1a1a;
-            color: white;
-        }
-
-        .subscription-table th {
-            padding: 8px;
-            text-align: left;
-            font-weight: bold;
-            border: 1px solid #1a1a1a;
-        }
-
-        .subscription-table td {
-            padding: 8px;
-            border: 1px solid #ddd;
-            font-size: 12px;
-        }
-
-        .subscription-table tbody tr:nth-child(odd) {
-            background: #f9f9f9;
-        }
-
-        .subscription-table .number {
-            text-align: right;
-            font-family: Arial, sans-serif;
-        }
-
-        .restaurant-name {
-            font-weight: bold;
-            margin-bottom: 1px;
-        }
-
-        .restaurant-type {
-            font-size: 8px;
-            color: #666;
-            margin-bottom: 1px;
-        }
-
-        .discount-badge {
-            color: #d9534f;
-            font-weight: bold;
-            font-size: 8px;
-            margin-bottom: 1px;
-        }
-
-        .trial-badge {
-            color: #2196F3;
-            font-style: italic;
-            font-size: 8px;
-        }
-
-        .subtotal-row {
-            background: #f9f9f9;
-            font-weight: bold;
-        }
-
-        .gst-row {
-            background: white;
-            font-weight: bold;
-        }
-
-        .total-row {
-            background: #1a1a1a;
-            color: #000;
-            font-weight: bold;
-        }
-
-        .features-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .feature-box {
-            border: 1px solid #ddd;
-            padding: 12px;
-            border-radius: 4px;
-            font-size: 8px;
-        }
-
-        .feature-box.pro {
-            background: #e3f2fd;
-            border-color: #1a5aa8;
-        }
-
-        .feature-title {
-            font-weight: bold;
-            margin-bottom: 8px;
-            font-size: 9px;
-        }
-
-        .feature-badge {
-            background: #1a5aa8;
-            color: white;
-            padding: 1px 6px;
-            border-radius: 3px;
-            font-size: 7px;
-            font-weight: bold;
-            margin-left: 4px;
-        }
-
-        .feature-price {
-            font-size: 11px;
-            margin-bottom: 8px;
-            color: #4CAF50;
-        }
-
-        .feature-box ul {
-            margin: 0;
-            padding-left: 16px;
-            line-height: 1.6;
-        }
-
-        .payment-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            align-items: center;
-            gap: 40px;
-            padding-top: 20px;
-            border-top: 2px solid #4CAF50;
-        }
-
-        .payment-left, .payment-right {
-            font-size: 9px;
-        }
-
-        .payment-field {
-            margin-bottom: 6px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .payment-label {
-            font-weight: bold;
-            min-width: 90px;
-        }
-
-        .signature-line {
-            height: 35px;
-            border-bottom: 1px solid #000;
-            margin: 20px 0 8px 0;
-        }
-
-        .signature-title {
-            font-weight: bold;
-            font-size: 9px;
-            margin-bottom: 2px;
-            text-transform: uppercase;
-        }
-
-        .signature-text {
-            font-size: 9px;
-            margin-bottom: 2px;
-        }
-
-        .footer-text {
-            font-size: 8px;
-            font-style: italic;
-            line-height: 1.4;
-            margin-top: 8px;
-        }
-
-        .invoice-footer {
-            font-size: 8px;
-            color: #666;
-            margin-top: 10px;
-            padding-top: 6px;
-            border-top: 1px solid #4CAF50;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        .currency {
-            color: #4CAF50
-        }
+        .logout-button-2 {
+          display: block;
+      }
+    }
     </style>
-</head>
-<body>
+  </head>
+
+  <body>
+    <div
+      id="loginPage"
+      class="login-page"
+    >
+      <div class="login-box">
+        <h2 style="margin-bottom: 20px">Admin Login</h2>
+
+        <label>Username</label>
+        <input
+          type="text"
+          id="username"
+          class="login-input"
+        />
+
+        <label>Password</label>
+        <input
+          type="password"
+          id="password"
+          class="login-input"
+        />
+
+        <button
+          onclick="login()"
+          class="login-button"
+        >
+          Login
+        </button>
+
+        <p id="loginError" style="color: red; margin-top: 10px; display: none">
+          Invalid login
+        </p>
+      </div>
+    </div>
     <!-- Header -->
-    <div class="header">
+    <div id="app" style="display: none">
+      <div class="header">
         <div class="header-content">
-            <div class="logo-section">
-                <div style="font-size: 40px;"><img src="assets/output-onlinepngtools.png" alt="" width="200"></div>
-                <div class="logo-text">
-                    <h1>Invoice Generator</h1>
-                    <p>by Fitshield</p>
-                </div>
-            </div>
+          <div class="logo-section">
+            <img src="assets/bridge-logo.png" alt="Bridge Logo" class="header-logo" />
+          </div>
+          <div class="header-utilities">
             <div class="header-stats">
-                <div>
-                    <div class="stat-value" id="itemCount">0</div>
-                    <div class="stat-label">Items</div>
-                </div>
-                <div>
-                    <div class="stat-value" id="totalValue">₹0</div>
-                    <div class="stat-label">Total</div>
-                </div>
+              <div>
+                <div class="stat-value" id="itemCount">0</div>
+                <div class="stat-label">Items</div>
+              </div>
+              <div>
+                <div class="stat-value" id="totalValue">₹0</div>
+                <div class="stat-label">Total</div>
+              </div>
             </div>
+            <div>
+              <button
+                onclick="logout()"
+                class="logout-button"
+              >
+                Logout
+              </button>
+              <button
+                onclick="logout()"
+                class="logout-button-2"
+              >
+                <i class="fa-solid fa-right-from-bracket"></i>
+              </button>
+            </div>
+          </div>
         </div>
-    </div>
+      </div>
 
-    <!-- Tabs -->
-    <div class="tab-container">
-        <button class="tab-button active" onclick="switchTab('form')">Edit Invoice</button>
-        <button class="tab-button" onclick="switchTab('preview')">Preview</button>
-    </div>
+      <!-- Tabs -->
+      <div class="tab-container">
+        <button class="tab-button active" onclick="switchTab('form')">
+          Edit Invoice
+        </button>
+        <button class="tab-button" onclick="switchTab('preview')">
+          Preview
+        </button>
+      </div>
 
-    <!-- Main Content -->
-    <div class="main-content">
+      <!-- Main Content -->
+      <div class="main-content">
         <!-- Form Section -->
         <div id="formTab" class="form-section">
-            <!-- Invoice Details -->
-            <div class="card">
-                <div class="card-title">Invoice Details</div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Invoice Number</label>
-                        <input type="text" id="invoiceNo" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label>Invoice Date</label>
-                        <input type="text" id="invoiceDate" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label>Due Date</label>
-                        <input type="text" id="dueDate" readonly>
-                    </div>
-                </div>
+          <!-- Invoice Details -->
+          <div class="card">
+            <div class="card-title">Invoice Details</div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Invoice Number (Encoded)</label>
+                <input type="text" id="invoiceNo" readonly />
+              </div>
+              <div class="form-group">
+                <label>Invoice Date</label>
+                <input type="text" id="invoiceDate" readonly />
+              </div>
+              <div class="form-group">
+                <label>Due Date</label>
+                <input type="text" id="dueDate" readonly />
+              </div>
             </div>
+          </div>
 
-            <!-- Client Details -->
-            <div class="card">
-                <div class="card-title">Client Details</div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Client Name</label>
-                        <input type="text" id="clientName" value="" onchange="updateSummary()">
-                    </div>
-                    <div class="form-group">
-                        <label>Owner Name</label>
-                        <input type="text" id="ownerName" value="" onchange="updateSummary()">
-                    </div>
-                    <div class="form-group">
-                        <label>GST Number</label>
-                        <input type="text" id="gstNumber" value="" onchange="updateSummary()">
-                    </div>
-                </div>
-                <div class="form-grid" style="margin-top: 16px;">
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>Address</label>
-                        <textarea id="clientAddress" onchange="updateSummary()"></textarea>
-                    </div>
-                </div>
+          <!-- Company & Client Details -->
+          <div class="card">
+            <div class="card-title">Company & Client Details</div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Client Name</label>
+                <input
+                  type="text"
+                  id="clientName"
+                  value=""
+                  onchange="updateSummary()"
+                />
+              </div>
+              <div class="form-group">
+                <label>GST Number</label>
+                <input
+                  type="text"
+                  id="gstNumber"
+                  value=""
+                  onchange="updateSummary()"
+                />
+              </div>
             </div>
+            <div class="form-grid" style="margin-top: 16px">
+              <div class="form-group" style="grid-column: 1 / -1">
+                <label>Address</label>
+                <textarea
+                  id="clientAddress"
+                  onchange="updateSummary()"
+                ></textarea>
+              </div>
+            </div>
+          </div>
 
-            <!-- Subscription Items -->
-            <div class="card">
-                <div class="card-title">
-                    <div>Subscription Items</div>
-                    <button class="add-button" onclick="addItem()">+ Add Item</button>
-                </div>
-                <div id="itemsContainer"></div>
+          <!-- Subscription Items -->
+          <div class="card">
+            <div class="card-title">
+              <div>Subscription Items</div>
+              <button class="add-button" onclick="addItem()">+ Add Item</button>
             </div>
+            <div id="itemsContainer"></div>
+          </div>
 
-            <!-- Summary -->
-            <div class="card">
-                <div class="card-title">Summary</div>
-                <div class="summary-grid">
-                    <div class="summary-row">
-                        <span>Subtotal:</span>
-                        <span id="summarySubtotal">₹0</span>
-                    </div>
-                    <div class="summary-row">
-                        <span>GST @ 18%:</span>
-                        <span id="summaryGST">₹0</span>
-                    </div>
-                    <div class="summary-row total">
-                        <span>Grand Total:</span>
-                        <span id="summaryTotal">₹0</span>
-                    </div>
-                </div>
+          <!-- Summary -->
+          <div class="card">
+            <div class="card-title">Summary</div>
+            <div class="summary-grid">
+              <div class="summary-row">
+                <span>Subtotal:</span>
+                <span id="summarySubtotal">₹0</span>
+              </div>
+              <div class="summary-row">
+                <span>GST @ 18%:</span>
+                <span id="summaryGST">₹0</span>
+              </div>
+              <div class="summary-row total">
+                <span>Grand Total:</span>
+                <span id="summaryTotal">₹0</span>
+              </div>
             </div>
+          </div>
 
-            <!-- Actions -->
-            <div class="action-buttons">
-                <button class="preview-button" onclick="switchTab('preview')">Preview Invoice →</button>
-                <button class="download-button" onclick="downloadPDF()">↓ Download PDF</button>
-                <button class="new-invoice-button" onclick="newInvoice()">+ New Invoice</button>
-            </div>
+          <!-- Actions -->
+          <div class="action-buttons">
+            <button class="preview-button" onclick="switchTab('preview')">
+              Preview Invoice →
+            </button>
+            <button class="new-invoice-button" onclick="newInvoice()">
+              + New Invoice
+            </button>
+          </div>
         </div>
 
         <!-- Preview Section -->
         <div id="previewTab" class="hidden preview-container">
-            <div class="preview-header">
-                <button class="back-button" onclick="switchTab('form')"><i class="fa-solid fa-angle-left"></i> Back to Edit</button>
-                <button class="download-button" onclick="downloadPDF()"><i class="fa-solid fa-angle-down"></i> Download PDF</button>
+          <div class="preview-header">
+            <button class="back-button" onclick="switchTab('form')">
+              ← Back to Edit
+            </button>
+          </div>
+
+          <!-- Signature Section -->
+          <div class="signature-section">
+            <h3 style="margin-bottom: 20px">
+              Invoice Review & Signatures:
+            </h3>
+
+            <div style="display: flex; justify-content: center">
+              <div
+                style="
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                "
+              >
+                <label>Admin PIN</label>
+                <input type="password" id="adminPin" oninput="verifyPin()" />
+                <img
+                  id="sigImg"
+                  style="display: none; margin-top: 10px; max-width: 200px;"
+                />
+                <button class="generate-button" onclick="generatePDF()"  style="margin-top: 10px;">
+                  ↓ Generate PDF (Admin Signature Required)
+                </button>
+              </div>
             </div>
-            <div class="invoice-pdf" id="invoiceContent">
-                <!-- Invoice will be rendered here -->
+          </div>
+
+          <!-- Invoice Preview -->
+          <div
+            style="
+              margin-top: 30px;
+              border-top: 2px solid #ddd;
+              padding-top: 30px;
+            "
+          >
+            <h3 style="margin-bottom: 20px">Invoice Preview:</h3>
+            <div class="invoice-preview-scroll">
+              <div class="invoice-pdf" id="invoiceContent">
+              <!-- Invoice will be rendered here -->
             </div>
+          </div>
         </div>
+      </div>
     </div>
 
     <script>
-        function getNextInvoiceNumber() {
-            const year = new Date().getFullYear();
-            const nextYear = year + 1;
-            const lastInvoice = localStorage.getItem('lastInvoiceNumber') || '000';
-            const lastYear = localStorage.getItem('lastInvoiceYear') || year.toString();
-            
-            let nextNumber = '001';
-            if (lastYear == year) {
-                nextNumber = String(parseInt(lastInvoice) + 1).padStart(3, '0');
-            }
-            
-            localStorage.setItem('lastInvoiceNumber', nextNumber);
-            localStorage.setItem('lastInvoiceYear', year.toString());
-            
-            return `BRIDGE/${year}-${nextYear}/${nextNumber}`;
+      // Price configurations with 1M, 6M, 12M options
+      const priceConfigs = {
+        Standard: { "1m": 2999, "6m": 1999, "12m": 1499 },
+        Pro: { "1m": 4999, "6m": 3499, "12m": 2499 },
+      };
+
+      // GLOBAL VARIABLES
+      let items = [];
+      let invoiceData = {};
+
+      const users = [
+        { username: "admin1", password: "1234", name: "Admin A" },
+        { username: "admin2", password: "5678", name: "Admin B" },
+      ];
+
+      const adminUsers = {
+        adminA: {
+          pin: "121997",
+          signature:
+            "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wAARCADiAQkDASIAAhEBAxEB/8QAHgABAAMBAQEBAQEBAAAAAAAAAAcICQYFCgMEAgH/xABKEAAABQMCBAQCBgYFCwQDAAAAAQIDBAUGEQcICRIhMRMUQVEiYRUjMnGBkRZCUmJyghckM6GxGDRDU2NkkpOisrMlRKTCg6PB/8QAFAEBAAAAAAAAAAAAAAAAAAAAAP/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/ANUwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABl1vZ396p6Bbv029SXSjWRRjgOvUvyralVRpbaXXzJw/iL7Ro6GWMfMaijLLjYaXpNvT/AFDjMmaleNQJy0F3I/ro5H+JPf3ANTQHP6e3jF1EsG2rrgpUmFXaZGqbCVdybeaS4kj/AAUQ6AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGb3GK1hsj+jyBpbOXUl3kb8a4oaIaEHGQkvGYI31GfqRrwWPY8jSEYL8VWpOz97F8NKP6qBHp0ZBfxwGnP8VGA1c4eN5PX3sy0uqMgsOx6aql5P1TEecjI/6WSFjBg1w/t6MzaxfCYFdXJe03rayTPYxzeUe6YkNF/cZepfMsjdWk1aDcdKiVSly2J9PltIkRZkV0nGn2lFzIWhaeikmRkfTuA9AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYs7/rPjL4l9HYqKTXTLhmUFx8i/Y+qjH/ANhjaYZA8aW35dE1p07u9lzCJVGXDZP9l2NJNw//ADkA5Hhu7dLb3SaYa32ZXHVxH0OUWbTaiz1dgyCKcXMXuXoZepGYs1w7dabg0ivys7X9THmW65QDNVCfSsjStsyJZsEfr0VzJ/EuvcRdw4qXTbQ4i2s1FpH1dCRTqwilpSeUKilVIxscv8mRZjiL7UajrNaEC+7DQ6xqdaR+YhKg/C/MaI8m0R5L4iPqn8S+QC5YCv2yndLSd0mjdOq6JTf6VU5lqNXoRFyqZk8uOci/YXymovxL0FgQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSfi36YPX7tTfrERgn5VrVJipqLPxEwrLLmP+Yk/5RdgczqdZLOpem12WhIfVGj3BSZdKcfR1U2l9lbRqL5kS8gMTNhuoDN0b/wDSiqyWUwG2qc3RySRfacj0JcJP5mkhuyPm40flv6I7orLcurxKQ7al3xCrBGWVRyjzSKSnHr0JRD6RwGV+4G0Khw8939N1toZOPab3jNdYrUNlJGppTqvEfaIvYzT4iTP1LA0+oFfgXTRKdWaRKbnUqoR25UWUyeUPMrSSkLSfsZGRjkdedGqLr/pNcNi11OIdVjmhD5ERqjvF8TTqc+qVER/PBl6in/DP1UrtkVa7NuuoTzrN1Wo+pylNPl1dh91Ek/UiySi+SgGgADIvarqvcVrcU+/7YdrUlVHuO6a9Bmx31ZQ55c5S4v3GRpwWMdxroAAAAAAAAAAAAAAIi3Ibo7H2t2pGrd5SZCjmPeBDp8BsnZMlfc+RJmRYL1Mz9R/ZoHuV0/3K24/WLErP0g3GUlEqI82bUiMo+xOIPtnB9SyXzGXO7OXWd8/ECg6YUZUkqFb01VBUtJFiKhpwvpGR8zIyMuvfkSQ/7um2a3tsMuynapaM12uOW2yk0yJycOSKYroRk/ypw5HWXQ8lgjzn0yGywCvezHd3Qd2WmrdSjm3AuynJQzW6QR/2Lpl/aN9T5mlHk0n6dSPqXWwgAAAAAAAAAAAAAAAAAAAAAAAAAAAMfOMPt0Xa1/U7VyltkdJr/LT6kST+xNQhXIr+ZCPzQY0f2w7l7V3I6e0uq0atQJlfRT4z1ZpkZzLkF9aPiQpPci5iUX4D/m8XSNWuO2m/rSYYck1GTTVyaeyyfxLls/XMJL73G0p/EYhbHNwyNtG4Sh3PNccZt6QlVPq6UFzGcVzB82PU0qJKv5QH0RDObit6XV+1alY+4OzFpi1m0XEx5r2CylPiEqO5j1wtS0n/ABEJ2327qZGgm2tu8LMlR5lTuCQxCo1Rb5XmE+KhThP9cpUnkQeO5ZUQodfm6Ld7R9LK/TNSbPVcdm3bQltKrMqgGlmNHkxu6XofKkuiv18mXfp6BCugWoKdSuIhaN4xGVUxu4L3KqKi5z4SpL5rWjPr3Mb/AA+c3Y6lat3eknJ3/SKHn7s9f7sj6MgAAAAAAARduK3FWrtjsBN23amc7AcltwWmKcyTrzjqyMyIiMyLslR9T9B+2hO4qxNxtportlVpqclKUnKgOKSmXCWf6jzeTNB9/kfoZj+/W/Re2tf9NqtZd1xCk0yc2fI4RF4kZ4iMkPNn6LSZ5I/w7GMHVr1P4d25J9uM95WuUlRZPCjh1eCpWc46Gplzl+RkZehl0D6HhwOvmpaNHNFb2vVSmSdolIkzI6Hzwhx9LZ+C2f8AE5yJ/EcltS3UWzur08RX6L/UKtGMmqpRnF8zsJ3r0M8FlJ4yR4ED8XrU6PZ211VrkpPnbuqDEQk4yrwGFpkOKL7jQ2X8wCuPBZsJys6i6h6gTFKc8nDbpjbjh9VOPueIo/yaL8xrPKis1CM5HkNoejOp5FtuFzIWkxVfhf6cFp5tCtd1efN3A49WnubvlwySkv8AhQn8xa8BjpuR0cunhwbi6Xq7pyg1WFUZnKUNKjJCeY8uU9zufKZJM0n7F7pGr2kurFta22HTLwtOd9IUWekzbcNPKpKiPCkKT6KI+hkGr2ldB1t03rtk3Kyp+jVhjwHvDPlWgyMlJWk/RSVElRfMhmBtE1OuDYLugrGhN/vIKz63UP6tVZH1aW1qI0x5ZZM8Ie5SSZGfQy/dAa3gAAAAAAAAAAAAAAAAAAAAAr5uJ3tWDtov+0LTusphSbgMnFzGUp8CnxzX4fjvGZ55ebPQiM+hmAsGKN7YN/NV1E3Qag6RX9Gp9Ilw6rMh0JcY8GtUd5aFx1n2UrlTkj7ngyF5BglXNEb81l3na8lpwvluu27hrNfjNoknHkr8KqmnMc/VZGosduuPkA3tHzQa724in686kUimQyaj0+4Kky3GiI+Btlp9wix8iIho9pvxmToVKqlP1ZsKWzc0FXIhNBR4aHFF3S6h5eWzz6kZ/cKxad7aa9XtsNZ3F1AqtWpbFwOLqUFTho+laKZcs5wzyR9TUojPthCvYgEWXvbuq1K232HLrUl+fpFOmPSKC6TqXI0eTzOIfax/aNZMnOh9DweOucbL6fb9NB5Oj9LuB3UGj0tqLBZRIpcl5KJrC+Uk8nlyyozyR/ZIy+Yzn2+0SRrBsw120bI41ar9pS2rtoSWi5yX0NMg2T+RIURfN35iZ+F9Zeh2udkx6dcNkUGTqRZ0hT5PqQfiTYxqI25K0H0VyqUSevryn6gP5d++32l7ddZLP3NUSQciBIu+nTJ9CW1jMgjVINaTL9omldPQzGqooZxeoDl36Oae2RSU+auivXlFKnwEdVPqKPIbP8MuoL8Re551DLanHFeGhHcwH6gKJN8RSras7qrf0x0WoFLuy3Ckt/TFwS1OEXliUXmHGMKIsJSfQzJWTLt16XtAAAAAU54lm03/AChdIVV63aX5u/7cLxYfl2jU/NjdfEiljqeebmIvcj9xcYAHzUaC6/3ltvveNc9mVRcOURkT8NwzVGmt5/sn0EZZ/wAS7kZC1G/ncDG3m3lohSbIcaddqFKa5YCVczkapzpBMLiLP3Lw0Fn1I8iYOKrsllyZ0rWix6YlyOTCnLohRiwrKSUo52M9cJ6Kx7EfuM+dsl10Kx9wWndxXNIciUSk1+FUJEhpOSbS08S8mXqWSLPyyA+kG1rbgWdbNJoNLa8Cm0uIzBjNF+o02gkIL8CIh6g8+kVeDctKi1KmymZ9NltJfjS4zhLbebURKSpKk9yMf2gP9ig/Fn2xr1R0qj6j0OKly4bRbWuZ8WDep2FKcLHqaT+L3wahfUAFedhOvCtf9ttuVidNObcVOR9GVdSy5V+YbIi5jL95JpP55MWJGSehM+TsN4iNZ08moKBYl7SUsQEErnSll11ZU9Rq9yPKD+8xrYAAAAAAAAAAADm771JtTS+kIqt33HS7Ypi3Usol1aWiO2pw+ySUsyIz6f4jpBUDinaYSNRdp9WmQTLztszGa2j3NKCUhePnyuH+QC11GrtPuejxKpSZrFSpsxlL8aZFcJbLyFdUqStPQyP5D0RSPhG6qxL42rxLZ50lUrRmvwXW8YPwnXFPtr/HnWX8ou4ADN3jSaaJqmnFi3028TT9KqK6S4k/125KM9PuNo/zELvb5dVto+7rUSnX5LqN528qrPtu0OVJMvDYUrmjPw+bokuTl6EWMd+vUvb3I7lIPEjunTbSTTWDXadCdq3m6s9VIbREhsi5CfwSldEpUs/TvjAC0ezXiDafaoaNUsr4vSk2xeFJYbi1P9I6kzE80skkXmEKcURKJXc/Uj7iJeHLbqL13ibitV6Y/wCatl6pVCnU6YksIkJk1A5OSz3LDaT/AJhLGpXCW0G1Drh1OLGrtmqURc8W25jTbCjL15HmnSL8MELM6PaPWtoTYVPs+z6f9HUWHzGlClmta1qPKlrUf2lGfcwH43boLplf9XVVbn06tO46opJIObV6JGlPGRdi53EGePxHSTLSo9Qtp63ZFMiu0F6KqC5TVMp8BUc0chtcmMcvKeMD1wAZO7PbbrOhe96nW55OSqTAVOsW4XTjqwuKhjzFKnY68iZCYycZPGEn7iaN0fDPkXdfsbUPRC4o+mt2k54klDTrkOP2+2yphOW1e5YwYsrM0onxt3tL1KhtEumybMlW9UFcxFyOJmMPx1Y7mZkbxfgPL3Q7zLA2r0lP6RSl1C4pLXiwbfhdZMks8pH7JTn1MBXDS/a3dGmd3N657qtSY1ectNjmpiFynH2IBmf2smksnk+hJI8n1PsIdvXU7WHikX9Isqw4cqzNFY8hPnJ8xjJK8NWTVJUnopwzMjTGI8dCMz6cw/ayNu2qfEp1Fi6l6qrk2ppbgnaRTGXS5lx1F0TH6dCPGTWouvX8dSrOsyh6fW3Bt+26XGo1FhI8OPCiI5G20+xEA4rQDbjY+2qzUW9ZdKTEQsknMnOYVJmuEWPEdXjqfy6EXoQk8AAAAAAAAB+brqGm+dfQh8y6LIubUqBed7Um3M0SjuImVQ6c0SY9OQ+s/D+D0R0Mi+4fQtutupFl7aNUqt51NPfZtqoJjSFH9mQqOtLWPnzmkUv4Klm+DpVqJcjxEtNTqjFOT80MMmZ/+YB/Lwg91cq6qJI0ZuBanpVHjKmUSUfrFIy52D/hM8l8jMvQaYDGniJbXZ21HVSjaxaYqVQ6BMnEtBQi5U0moYPBpLqRJVgzLp3IyFl9o/FVtLUelxaDqxLi2jdico+lVETdNm9cEaVZ+rV26H0+YC/4AACh3Fm27N6h6Mo1IpaVouSzEmta0KxzwVK+sSZfumZK/MWK2g6+M7kdA7avPna+lHWvLVRposJaltkROERex9FF8lCVa/QIF00So0arxW51KqEdyLKivFlDzK0mlaFF7GRmQzG4cL9V2z7udUdvtfmqJp7mkU7nIk+ZcYIltupT6eLEUSz/AICAf74nOqurMPdNp7pxp9eFZttNZpUPysWj1VyAcmZJmvR08ykmX7KS+RfcPY2H79r3XqkjRPW7mTXErXAg1Sajklplt940nr1UfXCu+cEffI4jioVN7Trezo1f0llblKp9Ppz2U/tRam6+sv8AhWgdhxitD2oNMtPWihMqg1uDNbp1RmxzwrkPKo7p/NKkmWf3kgNNwEW7XtWS1x2/WLeq3kvS6pTGjmqSnlLzSC8N8sen1iFiUgAAHjXbeNCsKgya3clXg0GjxsG9PqMhLDLeTwWVqMiLqYDwtcLxm6d6LX9dlNQ25UaDb9QqkVDxZQbrMZxxBKL2yksjPzh471bl3GXvdWlmslYbuxFep6108pEKNHQtJJMpMZSWUpIyNJmZZyeEn2yNBryodI1y0ertFiVVDlDu6hyITdThGl1JsSWFIJ1Hor4V5IYZbXl1HanvjtCHeyW6JIo1Zcp1RclnytNNvtKYN0ldsYXnPbADo9hmu0vaRufeoVyzWoFuVGSuh13nV9UytCjJqR8sKLuXcjUN3RiHpztTib0dyG496iVwosODVqjUaHUGC5oLzz85045GZfqmklH0yJL2+bz9TNik9nS/Xuz667bTCTbpT6UJXJito+HlYVkkSWMF0MlfCfY/QB7W7ujU6yuKvpbMKnx6ui8GqW1VoNSYS/GU3JddpavhMv8AVl+eBpVZGkNiaZuyXbPsu3rUckkSX10SlMQzdIuxKNpCc/iMv7fu9fEG4hVi37bFu1SHZFkIgqfnykEk0eXedlNm6ZGZFzOGZEWT/vGtoAAAAAPOrldp9sUqXVatNj0ylxGlPSZst1LTLCE9VLWtWCIvmYzK3K74L93RXajSja6io1Fp1rnqFwU5DkV5wskXwOOGjwGuvVasGecdPUJi3wcRamaKokWLpm8xcuqD7nlFJZR47VMX2PnL9d3r0R1+fsI82tcPWuaq109WNy7k2u3DMWl6Lb9QX9ki6EclP3Yw30+YmXZTw8LY2zwo1xXD5e5tRFpJRz1oy1Tuhkbccj7d+qsZ9sELhAPzabSy2lCOhF2H6AAAAAAAAAAAACmfFmvSPbGzmvU1xk33biqUGkt4/UWlzzRH+Uc/zHp8KyiQqVsosqXFRyO1WRUZkg/dxM15n/taSIM42N0vxLD0zt1noifUJs9Rn/uzTZF/5jFxNl1vRLZ2maRRISTQw7bMGbg+/PIZS+v/AKnVAJB1L05oWrdiVm0blhlOotWjqjyGs4URH2Uk/RRHgyP3IYIXHtyt3R/ddUNItSrhdhUpEluGi5oXhpbjeO22uNLdQ4eOQicLxUZLHXB9CMfQsKEcWbbM1qZpEWpNIhk5ctpN80lRKx4tO+I3CMvU0mfN74NQCvy773McMusoplfQ9qHpKgyjwXXzzDx15Uoe6riK6n8KspP2PuLw7Wd/mmu6GO1Ahy02zePLly3Km+nxVnk/7BzoT5dvskR9eqSHC8N7c1F3M6GyLOufknXLbUdFNqKJKic+kIik8rb5578xZSrPqXzHl7k+FPpvqpCkVPT9tvT26SI1N+UT/UHzP0cbL7OfdP5ALyjN7iv2dUtOLn0z3B2uaEVm3J7VNk82DJWFKejmZevxE4R/xEI6tHehuB2PXo1aOvtHqd5WwpfhM1Z7K31evNHlqIikkWSylZ5Lr1IaGVFWnW8rQ2s0ynVmHclp16KqG7Jp7qHVxnDQSi9+R5s1JVg+pGRZIBnpxXa+1rjt70I1doWCt99chosn8SHpTTa/DMvdJw3CP5kYttuocVuB4cNxVtKShnWrQhXPyduTkSxPNP8A+vAoLZcSo1jZtuC0CuVpmTeOmE467TmzfJXhtsy8TlMq9kkTnyM3vcxa7b1qGvUThL3Ybkwpk+j2XXqQ8X6yPBivk0k//wAZtgP7ODTWJVV2pVhmS8byIN1SorGf1W/KxFkX5rV+YuXqTfUHTDT25bvqaHHafQqdIqUhtksrUhptS1En5mScCkvBZQZbX7rcP/SXjKP/AOHDHm8XrWSRGsa29ILfN6XXrpkpky4cRPM4qM2fwp6ftLweP3QHhcLzcjqXuA1z1OlXfXpNUozkBM1EEzM4sF85GENsF1Ik8hq7exewkDjJw5cvajSVRSM0MXTFefx/qyiyyP8AvNIhvgaJI061L9T+hE/kU4TZxftRY9q7W021zp87dNUjxiRjKvBZV47ii+40Nl/MAlvh41gq5su0qkl+pTFxf+S+61/9BSbiGaWI3KcRLTrTqmVJuPKl22xEmvcvP5UkPTZCjMvfwzI/xIcjpbozvw2+0Bq3tP4k6JRakZPtstvUqU2hRl/vJmcfJH26dS+QuVsh2VVjR6q1TUfVaopurVmrmfPUHZSpKobZ/aQS1d1K6ZMvQiIgExbXtrVp7VbEct621PTpUp3zFQq0wi8eY52I1Y6ERF2IhJF4WLbmoVHOk3TQKXclLNaXDhVeE3KYNZdlcjhGWSHugA8a07QoVh0OPRrco1PoFJYNXhQKZFRGYbMzyfK2giIsnk+g9kAABHWuuvtm7dLGkXTelTTChpyiPGbwqRMdxkm2UZLmV/cXqZCvu9PiLW5to57btlmLdt/qylyD431FNLp8Ug09SPr9nJH74EGaDbE773R3C1qtufqdSmokJNdPtR5xyOtCTPJc6Sx5dvp0QnBn6+mQ4dqfrPxbLgchkSNN9GqTI5nFIQcpCnyLoRn8HmHSI/TlSnm9M9dH9uu3G0NsdhIta0WHfBW548ubKVzvynTLqtZ/4EXQhIVAoNNtakRKTR6fFpdLiNk1HhwmUsssoLslCEkREXyIeiAAAAAAAAAAAAAAAAADKzjcyc1DSaP7MVVz/pZL/wDg06s21oVj2lRLepyPDgUmCxT46fZtpskJL8kkMj+Mgcmt7o9O6Akjcadt6OaG/dbs2Sg/+whsSAAAAMX7ko8/hfb5qfWWW5crTis+KpvwyNRrprivjYxnqtgySZe5JT7jY+h16Bc9Gg1elS2p9LnMIkxZcdfMh9paSUhaT9SMjIxXriD6D03XLbdcDb70WDV7fbVWKbPlOpaQ060kzNKlq6JSpOSP8BnNtP4oFQ22aIfoLULWeuyRAkmqkvOzCjNsRl/FyK+FRmRKNRljH2u4DZC+7DoOplp1G2rmprNXolQb8KREfLKVl3+8jI/UhitWLxa4bm6GQvS++qdqFa8hPLUKSiWl0/B5vijyXEfAT5GRmRkXTpki7CUoFM3mcQSlLVPnFZOmlUM/hNBU6E63nJESSI5Mhs8frGaT9xa/QbhY6N6OPR6hWIjuoNbaIy8xXkJVGL25Y3VPT941AKjb4HIdma/6Z7k4VFl1HT/UegR/paO7jndZkQvAfj/uLXAcIiP3Sr2HEbIdYnLU277mNMqhIJUORZ1SrEHOTInTZOG9j7zU1/wiOOIncWoD+6G+KDelcm1ONTqi45SYapB+WjQ3frIxIb7FhC05+f3it0G5alAnrmMSlsyHIa6etZerKmPAUj/lngBsrwWyMtrFykfcrxll/wDDhCKNpdslu938X5rnPI5Vn29UD+h3HmuQnVJ+phGXzShHP/ERCOW9cC0G4WFoW3Snibrmp0msM8+Mk1ETJVHlfcZp5Ul/EY0e2P6GHt9232rbUqMcauPtfSNXSpXMfm3SI1kZ/IiSn+UBQLYXfdN2K7odVtJNTanDpDc84zKKy6fhseIxzLjn+6l5qWauvY8F8x1WsFRpvEH34Wba9tIauLTex2ydrEzJ+Wkp8RKnyI/XPwNkfr1F1tyezDTXdK1Edu6DJi1iGXLHrNKcSzLQnvy8xpUSi+RkY6Lb7tosPbNaz1EsimLipkrJyZNlOeLJlrLOFOL9cZPBEREXsAlQAAAABXLdxvhsbabRUt1NSq7dsps1QrfhLT4pljo48efq2/ngzP0IwE53lelC08tubcFy1WNRaLCRzyJsxfI22XzMZoaz779QN4Nzr0l21UeoR25SHCn194/LvqYLBGojP/N2jyRGpXxHki6ZMj5zTnR3WfigVuHeeqlVdtPS6KslQoNPbNpEg8YUcVK+bvgiNxRn29cDTHRnRCzNAbNYtiyaM1SKY2fOsy+J19fqtxZ9VK+ZgK6bKOHZbm2ZDVy3G7HujUJZZTNJH9Xpxdcojkf39VGWfbBC4wAAAAAAAAAAAAAAAAAAAAAAxv4xz8y3t2Fg3BHL4mLZiGwf+1bnS1//AGSNjRmRxtbWlOW3plczRJVGiSJtPdz+qbyGzI/+hQ6C7OLbaen2i9pM05pV6akvW/CcqBsoNqDGnKjpNZLUfU/j5vhT6eoDQi4LhplpUeVV61UotIpMRBuSJs59LLDKC7qWtRkRF95iie4Diy2lasw7X0dpTmpN1ur8uzKJDnkEr6fZ5fjfPqf2cF0+0INpu1fc3v3ntXJq9X3bBtRlXiwabOgq+HoXxNU/mLGU46rMjP5i/wBtr2c6c7X6Mhm2aYmbXFJMpNw1BCFzn8nkyNZEXKXXsWAGe9lbG9xu8u4GLi1zuqs27bqlKdKPWcFKLJ9mIBYbjZL1Mi+4xyG+PZm7spuKy9SNLXKgdvw32FOTJ60SVw6i2o1NqPoXRXLnGMZI/YbUjj9X7WtS9NMrlo98lGK0ZEF36SclrJttllKeZTprPojk5ebmPsac+gDKXUji06pV7UGjO6cQ4EeiM0xiRLpL8Hx1SJBMeNLLnLqSU9SLBljlz1yYvPs539Whu1Q/SWoD9tXnEY8xJo76/FbW3nBrZdIiJZZ9DIjLJDJ7h/axWloTuhpFcuOO3Kokg3aW1U3yJJ083TJKJRl7YyR+xKMWg32bFKroLcB65aGqeosemuefqNNpmErpRkRmciOREWGiIj5k+nftnAdFxn9ClzKZamq1MhktUPmpNWdSfXlUZHGVj1wo3C/Ehk2NerR3o2pvw293RpFeDkK0tS6rTDahFPf8vAqM0vjjmhWcllaWzNJ59TL0IZy2loW/eei2oF2wnXUVqxZcf6XpLrf/ALN8za8ZH7zbjZ85exkfoAtZwxdJ1bjdU6LVrlWmbbmklPaahQ3f9JIkSpUhhWPUknzq6/spGzQwI4eO6dnbJrgh+sumzZ1fbTT6qo8mTJ5y3Ix8jzn5GY3zadQ63zo6kA/QAAAHn1arQbcpUuqVSWxAp8RpciVMlOk20w0kuZa1rV0SkiIz69hGe4rdFYe2C10Vi86ipD0gzTCpkRJOSpai9EIyXT3M8EQzcq14a88VeuKpFtQ02DpVTnibmGqYtbCj7/XLLHmVl6JJJEXfp3ASxue4kFV1DrE3SrbjTp1x3FLJcdVyU4yPsWVHCwfxGRfrnguvT3HSbROGJTrTlHfutqk3re0xa5X0RPUUuLFWvqpb5qz5h7JnlR/CXsZ4MrM7XdqVnbWLJRR7fYTMq8hJHUq6+2RSZy8meVH1wks9El0H+9ym7Ow9qtIpM29XZ6l1VbjcKJTY3juvKQRGrpkiIviT1M/UBJt2XhQdP7fk1q46tCoNGipy7NnPJZZbL5qMyIUoq+8/UPdPdZ2btqob8WjJd8Go6j1mGrycPoZmTaDIyMzweM5M+mEiDqFpdrDxRrqbu27Z7tl6MRpviU6nd1rQRYM2Sx8Sjx1WfT29xp/p9p7b+ldoU62LXprVJokBHhsRWeyS7mZmfUzM+pmYDntCtHUaI2MmgfpNXbvluSHJkus3FMVJlSHl45lGo+xdC6f4iRAABXTfjH1ed0Hfd0ZkTWbkjzmXZSKUnM52IXMS0Md/iyaDwRZMiPA87YBG1ge0bfq+stXq0u4KjNWuPTq3CKNJgso+EkqLBGfMZc3UuhY9xZwAAAAAAAAAAAAAHE6u6z2boVaD9y3tXI9EpbZ8qVPK+N5eMkhtBdVqP2IB2wrPuW4gWlO22POgyqwzc14MGbabbpL5LeS6X6j6yylj583X90xTvUjdprnvruCVae3ejVag2a14ZS6waihyMmR5J2RzGSCP9lJ5PHqJ32q8LCxNFjhV6+Ft31dzZcxIeb/9PjH+42ZfEZe6vn0AU71BXub4lMGdW2bZcpWn9JbenU6n8rkeG8ZF0Js8GqW/jOMFgj7Y5sHKPByt3S+40XM7PocKXqjR5qZsaZKRzKaiLSSUrj5+zhWc+vxJ9xqqMed1FnXjsK3mt612zT1P2XXKmuWZsLIkOeN8UyG6XU08yiUpJ9ux9yMBsSAj3QzXez9xFhRLtsypFNp73wPMOYS/Fdx1adRk+VRfkfcjMhIQAKbcVLXH+iXbBUaLCkE1WrxWqjspIjM/LmWZRl7fVny/zi5Ixx3f1aVvl3525pRbSnmqFb0ldFektpL4TJw11GSXXHQk8pe/IXuA6q1OHtTNUuHdblcotDItUzZersZ9JfXT0qWoyjKyZdDQScZ9SL3EmcL3e7M1EjO6T6hVEjumnJzSpsx362c2WeZk891oIsl7l+BDQahUCBa9FhUelRG4FLgx24sWKwXKhhlCSShCS9iIhn3xHthFQv6d/S1pZAX+mEb46rS4PwuzSLJlIZIiz45dO3UyIj7l1CTNy/C+0w1zOoVi32/0Cu+ThRzaejmiOq/2kfJJPPTqnlEO7M+Gpf8AorqHcz191Shy7Or1tzrdqMKlSnVOS2pGCP7SE4wRH19BKHD33+wdxdEi2Xd8lEPUiCz1UrBIqjaS6uI9CURYyX4i7gDATSbZBO1Q1M1V00p9xQ2dRbNeWUCHLT4USqNsyDZfPm6mXXlP179fXGuWw2xNTtM9vVLtnVRLbdZpr62ILJSG31swSJPhIWtGSMy+Ii6meMZFQN6kr/Ji4j+lusKG/JUOvojN1eoPJ52yJP8AU5ZkXumGpsy+ZjUgB5lxXHS7RokysVqoRaTSYTZuyZ054mWWUF3UpauhEMrt0HGAq8+ZIoujEVFLpZfAq56pGJb7mehqYYX0IvmojPp2IWi4g+0a/N2VPsul2jXqVSKbSn5L85qrPvoS8pZJJHRtKskWFF6Y5u47fa7sY032w0OGcClxLgu5vKnrnnw0HKNR9ya7+Cn5JP7zMBhvR7d1S1ivNutuWzdeqNUeUh94340yoLmto/bWn4zRj5jezajZN7WRpZGYvj6Fp1QlrOWzbdu0xuFAoba/i8q0lBnzERnkzM+5n37nM4AA4bVDRCxdaWaU1e9tQrjbpcjzUNExJmTTmMGZYMs56dD6dB3IAAAAAAAAAAAAAAAAAAAAAKC72+JuWgN21CwLJoSKnd0RKDk1Go9IkU1YPHKRkajwZepF1Fd9q+gdxcSurVS/9Zb5qEym0PlpTESmk3HfM8c2OiDSkupn2MzMxq23phZzN6LvBu06Ei7Fp5F15NNZKepPLy8pv8vPjl6Yz26DpwHKaZ6V2no5acW2rMocWgUWPk0RoxGeTPupSlGalqP3UZmOrAAAczqPpzQNWbLqdqXPBTUaJUW/CkR1HjJZyRkZdjIy7jpgAY8an7cdauGveU/UHSOpvXBZEnKZZrieZ8GOXZM1BEXQjPotOPvIxMOmHGjtGTRSb1Ds6qU2toMyNdveHKjO+xlzLSZH+Y0mEa3fto0lv2bOm3DppalWqM7/ADmoSaNHVKd+ZvcnPn8QFHde+MTa7ljyYeklMqztzyUcqajWIaGo8AzMuqkmo+Y/7h3PC92i1XR+26lqRe0Vce8rkaJuNEfPK4kLoZEfspRkR/IiIhaizts2kmn1RiVC3NM7Uo9TiK5o9Qi0dhMlo/dL3Lzl+BiSwAAABmZv74fVUYrj+tOiyZkW4o8hNQqFFphmTpukZH5mISepKLuaS+Zl6kUr7AeIJB3G02LZt4ut0/UqM0rBkkkNVNCS6rR6Eoi7p+R4+d3Bmfv24d836WLV3RGFIhXHHfTJqFCpHwLUrp/WIhFjCy7mkvvIvQBKfFt0d/pD2znc8WOp6p2fLKcRpVgyiuYbkF+XIf8AKJq2Qanu6v7VdObjlPLkT10wocp1xWVuPR1KYcWZ+6jb5v5hXHZlv4tTctZZ6WauvRCu+oIVSFIkIxHrzbpKThJEWCUaTwZdM9yHHcKy80aS6q6ubfarVmJT9Kq8hynOEk0eYfjrNiXy/wDA2os+hGA0yAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAZ5cQThtq1jmytQtLo0SHd7hKcqtHUfhtVQ/iM3kn2J/wCI++CV9/fNvS7Xm5tNd1VrajXZPqC67SatHRWnXmzOSuKgiYktqI+6zY5k/iPoxFFN+3Dpo2uNHql7WFBbpeoyDVKkNt/YrB4LKV5PBLwXQ/XsAvFFlMy4zb7DiHWXEc6HG/sqSP6Rm1wlNzN03W9XdGbu8zJftuB5qmPScEuJGZW3GOIosZ+E1JxntgyGkoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA5ig2lQ6RedyVmDRafCrFS8Dz1QjxW25ErlQZJ8VwiJS8F0LmM8DpwAAAAAAAAAAAAAAAAAAAAAAAAAAAAH//2Q==",
+        },
+        adminB: {
+          pin: "1337",
+          signature:
+            "data:image/jpeg;base64,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DEE6+ZctcXkl5cqT/sJGULZyf9Z3oA+XPj1+0x4//aP8Qpq3jjW572OPItrGIeXa2q7icJEMAnn7x5PAzgCvpb9mL9vL4R/steGoLfw58HL3UfEc0a/2jr11qamad8YIQFG8tOAQAe59a+r/AIff8EZfhfolpCfFnibXfE12BmRbZls4CcDgKAxx1716GP8Agk5+zuI9p8PaoxzncdVlz9OMUAV/2ff+Cpnws+Ofiaw8My6ZrPhLXbzCxLqIhe2d+yJIj7ifrGK+zAcjI6V8/wDwi/YP+CnwR12HW/DPg+JdZgbfBf308lxLEcD7u44HT0719AKMCgBaKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigBDXxP8ADFV+FH7dfiDSSi29p4qgnggz0YRYmQD3y7CvtgjIxXyt+1D4Yt/Dvxp+GPxGlurS0i0288pxM7KWJyH6DByCo69qAPqkUtMikWWJHQhkYAqR0I7U+gAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAEIzSbadRQAg4paKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACvAf20/h/c+Nfg5f3ljbLd32io99FASQWIGePfivfqgvLeO9t5raZBJDLGUdD0ZSCCKAPO/wBnf4hQ/EX4M+D9ZZ1jvLrT4xNbsy+ZG6jawYAnB4/WvSuteSfBj9mzw78ENa1zUNEu72f+033C3uZN0duM5IQdsnvXrYoAWiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//2Q==",
+        },
+      };
+
+      function login() {
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+
+        const user = users.find(
+          (u) => u.username === username && u.password === password,
+        );
+
+        if (user) {
+          localStorage.setItem("loggedInUser", user.name);
+          document.getElementById("loginPage").style.display = "none";
+          document.getElementById("app").style.display = "block";
+        } else {
+          document.getElementById("loginError").style.display = "block";
         }
+      }
 
-        function getCurrentDate() {
-            const today = new Date();
-            const months = ['January', 'February', 'March', 'April', 'May', 'June',
-                          'July', 'August', 'September', 'October', 'November', 'December'];
-            return `${today.getDate()} ${months[today.getMonth()]} ${today.getFullYear()}`;
-        }
-
-        function getDueDate() {
-            const today = new Date();
-            const dueDate = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
-            const months = ['January', 'February', 'March', 'April', 'May', 'June',
-                          'July', 'August', 'September', 'October', 'November', 'December'];
-            return `${dueDate.getDate()} ${months[dueDate.getMonth()]} ${dueDate.getFullYear()}`;
-        }
-
-        let items = [];
-
-        const planPricing = {
-            Standard: { 6: 1999, 12: 1499 },
-            Pro: { 6: 3499, 12: 2499 },
-        };
-
-        function formatCurrency(num) {
-            return '₹' + Math.round(num).toLocaleString('en-IN');
-        }
-
-        function calculateTotals() {
-            let subtotal = 0;
-            items.forEach((item) => {
-                const months = item.term === '6m' ? 6 : 12;
-                const price = item.term === '6m' ? item.price6m : item.price12m;
-                let itemTotal = price * months * item.branches;
-                if (item.discount > 0) {
-                    itemTotal = itemTotal * (1 - item.discount / 100);
-                }
-                subtotal += itemTotal;
-            });
-            const gst = Math.round(subtotal * 0.18);
-            const total = subtotal + gst;
-            return { subtotal: Math.round(subtotal), gst, total };
-        }
-
-        function renderItems() {
-            const container = document.getElementById('itemsContainer');
-            container.innerHTML = items.map((item) => `
-                <div class="item-card">
-                    <div class="item-grid">
-                        <div class="form-group">
-                            <label>Restaurant Name</label>
-                            <input type="text" value="${item.restaurant}" onchange="updateItem(${item.id}, 'restaurant', this.value)">
-                        </div>
-                        <div class="form-group">
-                            <label>Restaurant Type</label>
-                            <input type="text" value="${item.type}" onchange="updateItem(${item.id}, 'type', this.value)">
-                        </div>
-                        <div class="form-group">
-                            <label>Branches</label>
-                            <input type="number" value="${item.branches}" onchange="updateItem(${item.id}, 'branches', parseInt(this.value) || 1)">
-                        </div>
-                        <div class="form-group">
-                            <label>Plan</label>
-                            <select onchange="changePlan(${item.id}, this.value)">
-                                <option value="Standard" ${item.plan === 'Standard' ? 'selected' : ''}>Standard</option>
-                                <option value="Pro" ${item.plan === 'Pro' ? 'selected' : ''}>Pro</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Payment Term</label>
-                            <select onchange="updateItem(${item.id}, 'term', this.value)">
-                                <option value="6m" ${item.term === '6m' ? 'selected' : ''}>6 Months</option>
-                                <option value="12m" ${item.term === '12m' ? 'selected' : ''}>12 Months</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>6M Price (₹/month)</label>
-                            <input type="number" value="${item.price6m}" onchange="updateItem(${item.id}, 'price6m', parseInt(this.value) || 0)">
-                        </div>
-                        <div class="form-group">
-                            <label>12M Price (₹/month)</label>
-                            <input type="number" value="${item.price12m}" onchange="updateItem(${item.id}, 'price12m', parseInt(this.value) || 0)">
-                        </div>
-                        <div class="form-group">
-                            <label>Discount %</label>
-                            <input type="number" value="${item.discount}" onchange="updateItem(${item.id}, 'discount', parseInt(this.value) || 0)">
-                        </div>
-                        <div class="form-group">
-                            <label style="display: flex; align-items: center; gap: 8px;">
-                                <input type="checkbox" ${item.trial ? 'checked' : ''} onchange="updateItem(${item.id}, 'trial', this.checked)">
-                                Has Trial
-                            </label>
-                        </div>
-                    </div>
-                    ${items.length > 1 ? `<button class="delete-button" onclick="deleteItem(${item.id})">Delete Item</button>` : ''}
-                </div>
-            `).join('');
-        }
-
-        function updateItem(id, field, value) {
-            const item = items.find(i => i.id === id);
-            if (item) {
-                item[field] = value;
-                renderItems();
-                updateSummary();
-            }
-        }
-
-        function changePlan(id, plan) {
-            const item = items.find(i => i.id === id);
-            if (item) {
-                item.plan = plan;
-                item.price12m = planPricing[plan][12];
-                renderItems();
-                updateSummary();
-            }
-        }
-
-        function addItem() {
-            const newId = Math.max(...items.map(i => i.id), 0) + 1;
-            items.push({
-                id: newId,
-                restaurant: `Restaurant ${newId}`,
-                type: 'Standalone Restaurant',
-                branches: 1,
-                plan: 'Standard',
-                price6m: 1999,
-                price12m: 1499,
-                term: '12m',
-                discount: 0,
-                trial: false,
-            });
-            renderItems();
-            updateSummary();
-        }
-
-        function deleteItem(id) {
-            if (items.length > 1) {
-                items = items.filter(i => i.id !== id);
-                renderItems();
-                updateSummary();
-            }
-        }
-
-        function updateSummary() {
-            const { subtotal, gst, total } = calculateTotals();
-            document.getElementById('summarySubtotal').textContent = formatCurrency(subtotal);
-            document.getElementById('summaryGST').textContent = formatCurrency(gst);
-            document.getElementById('summaryTotal').textContent = formatCurrency(total);
-            document.getElementById('itemCount').textContent = items.length;
-            document.getElementById('totalValue').textContent = formatCurrency(total);
-            renderInvoice();
-        }
-
-        function switchTab(tab) {
-            document.getElementById('formTab').classList.toggle('hidden', tab !== 'form');
-            document.getElementById('previewTab').classList.toggle('hidden', tab !== 'preview');
-            document.querySelectorAll('.tab-button').forEach((btn, idx) => {
-                btn.classList.toggle('active', (idx === 0 && tab === 'form') || (idx === 1 && tab === 'preview'));
-            });
-        }
-
-        function renderInvoice() {
-            const { subtotal, gst, total } = calculateTotals();
-            const invoiceNo = document.getElementById('invoiceNo').value;
-            const invoiceDate = document.getElementById('invoiceDate').value;
-            const dueDate = document.getElementById('dueDate').value;
-            const clientName = document.getElementById('clientName').value;
-            const ownerName = document.getElementById('ownerName').value;
-            const gstNumber = document.getElementById('gstNumber').value;
-            const clientAddress = document.getElementById('clientAddress').value;
-            
-            // Determine plan based on items - if any item is Pro, show Pro, otherwise Standard
-            const planType = items.some(item => item.plan === 'Pro') ? 'Pro' : 'Standard';
-            const sectionTitle = items.some(item => item.plan === 'Pro') 
-                ? 'SUBSCRIPTION DETAILS --- PRO PLAN' 
-                : 'SUBSCRIPTION DETAILS --- STANDARD PLAN';
-
-            const tableRows = items.map((item) => {
-                const rate6m = item.price6m;
-                const rate12m = item.price12m;
-                const total6m = rate6m * 6 * item.branches * (1 - item.discount / 100);
-                const total12m = rate12m * 12 * item.branches * (1 - item.discount / 100);
-
-                return `
-                    <tr>
-                        <td>
-                            <div class="restaurant-name">${item.restaurant}</div>
-                            <div class="restaurant-type">${item.type}</div>
-                            ${item.discount > 0 ? `<div class="discount-badge">${item.discount}% OFF</div>` : ''}
-                            ${item.trial ? `<div class="trial-badge">14-Day Money-Back Trial</div>` : ''}
-                        </td>
-                        <td class="number">${item.branches}</td>
-                        <td class="number">${formatCurrency(rate6m)}</td>
-                        <td class="number">${formatCurrency(total6m)}</td>
-                        <td class="number">${formatCurrency(rate12m)}</td>
-                        <td class="number">${formatCurrency(total12m)}</td>
-                    </tr>
-                `;
-            }).join('');
-
-            document.getElementById('invoiceContent').innerHTML = `
-                <div class="invoice-header">
-                    <div class="invoice-header-left">
-                        <div class="invoice-brand"><img src="assets/Bridge-Photoroom.png" alt="" width="200"></div>
-                        <div class="invoice-tagline">by Fitshield</div>
-                        <div class="invoice-tagline-2">Menu Intelligence</div>
-                        <div class="invoice-company-name">Fitshield Dietfood PVT LTD.</div>
-                        <div class="invoice-company-details">
-                            GSTIN: 24AAFCF2143K1ZT<br>
-                            Surat, Gujarat -- 395006<br>
-                            partner@fitshield.in | +91 95126 62666
-                        </div>
-                    </div>
-                    <div class="invoice-header-right">
-                        <div class="invoice-title">INVOICE</div>
-                        <div class="invoice-header-field"><span class="invoice-header-label">Invoice No.:</span> ${invoiceNo}</div>
-                        <div class="invoice-header-field"><span class="invoice-header-label">Date:</span> ${invoiceDate}</div>
-                        <div class="invoice-header-field"><span class="invoice-header-label">Due Date:</span> ${dueDate}</div>
-                        <div class="invoice-header-field"><span class="invoice-header-label">Plan:</span> <div class="invoice-badge">${planType.toUpperCase()}</div></div>
-                    </div>
-                </div>
-
-                <div class="invoice-billed-to">
-                    <div>
-                        <div class="billed-to-section-title">BILLED TO</div>
-                        <div class="billed-to-name">${clientName}</div>
-                        <div class="billed-to-line">Owner: ${ownerName}</div>
-                        <div class="billed-to-gst">
-                            <div class="billed-to-line"><strong>GST: ${gstNumber}</strong></div>
-                            <div class="billed-to-line" style="margin-top: 4px;">${clientAddress.replace(/\n/g, '<br>')}</div>
-                        </div>
-                    </div>
-                    <div class="trial-box">
-                        <div class="trial-box-title">14-Days Free Trial</div>
-                        <div class="trial-box-subtitle">Dosa Charcoal</div>
-                        <div style="font-size: 9px;">Trial valid from date of activation</div>
-                    </div>
-                </div>
-
-                <div style="margin-bottom: 20px;">
-                    <div class="section-title">${sectionTitle}</div>
-                    <table class="subscription-table">
-                        <thead>
-                            <tr>
-                                <th>Client / Restaurant</th>
-                                <th style="text-align: center;">Branches</th>
-                                <th style="text-align: right;">6M <span class="currency">₹/Month</span></th>
-                                <th style="text-align: right;">6M Total</th>
-                                <th style="text-align: right;">Yearly <span class="currency">₹/Month</span></th>
-                                <th style="text-align: right;">12M Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${tableRows}
-                            <tr class="subtotal-row">
-                                <td colspan="4">Subtotal (Base Price)</td>
-                                <td class="number">—</td>
-                                <td class="number">${formatCurrency(subtotal)}</td>
-                            </tr>
-                            <tr class="gst-row">
-                                <td colspan="4">GST @ 18%</td>
-                                <td class="number">—</td>
-                                <td class="number">${formatCurrency(gst)}</td>
-                            </tr>
-                            <tr class="total-row">
-                                <td colspan="4">Grand Total (incl. GST)</td>
-                                <td class="number">—</td>
-                                <td class="number">${formatCurrency(total)}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="features-section">
-                    <div class="feature-box">
-                        <div class="feature-title">Standard Plan</div>
-                        <ul>
-                            <li>Up to 100 menu items</li>
-                            <li>Basic Nutritional Tagging</li>
-                            <li>3 FSSAI approved marketing tags</li>
-                            <li>1 Physical QR code</li>
-                        </ul>
-                    </div>
-                    <div class="feature-box pro">
-                        <div class="feature-title">Pro Plan <span class="feature-badge">UPGRADE</span></div>
-                        <div class="feature-price">₹2,499/month vs ₹1,499 Std</div>
-                        <ul>
-                            <li>Unlimited menu items vs 100 item cap</li>
-                            <li>Full Nutritional Tagging + BRIDGE AI Chatbot for real-time guest queries</li>
-                            <li>Revenue Opportunity Reports + Live Edit Dashboard to maximise your yield</li>
-                            <li>Up to 10 Physical QR codes delivery</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="payment-section">
-                    <div class="payment-left">
-                        <div class="section-title">PAYMENT DETAILS</div>
-                        <div class="payment-field"><span class="payment-label">Bank</span> <span>BOB Bank</span></div>
-                        <div class="payment-field"><span class="payment-label">Account Name</span> <span>Fitshield Dietfood Pvt. Ltd.</span></div>
-                        <div class="payment-field"><span class="payment-label">Account No.</span> <span>50200098765432</span></div>
-                        <div class="payment-field"><span class="payment-label">IFSC Code</span> <span>HDFC0001234</span></div>
-                        <div class="payment-field"><span class="payment-label">Branch</span> <span>Ashram Road, Ahmedabad</span></div>
-                        <div class="payment-field"><span class="payment-label">Account Type</span> <span>Current</span></div>
-                        <div class="payment-field"><span class="payment-label">UPI ID</span> <span>bridge@fitshield</span></div>
-                    </div>
-                    <div class="payment-right">
-                        <img src="assets/image.png" alt="UPI QR Code" width="150">
-                    </div>
-                </div>
-
-                <div class="invoice-footer">
-                    Note: Dosa Charcoal eligible for 14-day money-back trial.
-                </div>
-            `;
-        }
-
-        function downloadPDF() {
-            const element = document.getElementById('invoiceContent');
-            const invoiceNo = document.getElementById('invoiceNo').value;
-            const filename = `BRIDGE_Invoice_${invoiceNo.replace(/\//g, '-')}.pdf`;
-            
-            const opt = {
-                filename: filename,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
-                jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
-            };
-            
-            html2pdf().set(opt).from(element).save();
-        }
-
-        function newInvoice() {
-            document.getElementById('clientName').value = '';
-            document.getElementById('ownerName').value = '';
-            document.getElementById('gstNumber').value = '';
-            document.getElementById('clientAddress').value = '';
-            
-            items = [];
-            
-            renderItems();
-            updateSummary();
-            switchTab('form');
-        }
-
-        // Initialize
-        document.getElementById('invoiceNo').value = getNextInvoiceNumber();
-        document.getElementById('invoiceDate').value = getCurrentDate();
-        document.getElementById('dueDate').value = getDueDate();
-        
+      window.onload = function () {
+        initializeItems();
         renderItems();
         updateSummary();
+
+        const user = localStorage.getItem("loggedInUser");
+        if (user) {
+          document.getElementById("loginPage").style.display = "none";
+          document.getElementById("app").style.display = "block";
+        }
+      };
+
+      function logout() {
+        localStorage.removeItem("loggedInUser");
+        location.reload();
+      }
+
+      function initializeItems() {
+        items = [
+          {
+            id: 1,
+            clientName: "",
+            restaurantType: "Standalone",
+            type: "Restaurant",
+            branches: 1,
+            plan: "Standard",
+            term: "12m",
+            discount: 0,
+            trial: false,
+            finalPrice: 0,
+          },
+        ];
+      }
+
+      function getValue(id) {
+        const el = document.getElementById(id);
+        return el ? el.value : "";
+      }
+
+      // Generate encoded invoice number (not human-readable)
+      function generateEncodedInvoiceNo() {
+        const now = new Date();
+
+        // Last 2 digits of year
+        const year = now.getFullYear().toString().slice(-3);
+
+        // Month (01–12)
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+
+        // Random 3-digit number (001–999)
+        const random = String(Math.floor(Math.random() * 999) + 1).padStart(
+          3,
+          "0",
+        );
+
+        return `BRIDGE/${year}${month}${random}`;
+      }
+
+      // Get current date
+      function getCurrentDate() {
+        const today = new Date();
+        const months = [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December",
+        ];
+        return `${today.getDate()} ${months[today.getMonth()]} ${today.getFullYear()}`;
+      }
+
+      // Get due date (7 days from today)
+      function getDueDate() {
+        const today = new Date();
+        const dueDate = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+        const months = [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December",
+        ];
+        return `${dueDate.getDate()} ${months[dueDate.getMonth()]} ${dueDate.getFullYear()}`;
+      }
+
+      // Format currency
+      function formatCurrency(num) {
+        return "₹" + Math.round(num).toLocaleString("en-IN");
+      }
+
+      // Calculate totals
+      function calculateTotals() {
+        let subtotal = 0;
+        items.forEach((item) => {
+          const price = priceConfigs[item.plan][item.term];
+          const branches =
+            item.restaurantType === "Standalone" ? 1 : item.branches || 1;
+          let months = 1;
+          if (item.term === "6m") months = 6;
+          else if (item.term === "12m") months = 12;
+
+          let itemTotal = price * months * branches;
+          if (item.discount > 0) {
+            itemTotal = itemTotal * (1 - item.discount / 100);
+          }
+          item.finalPrice = itemTotal;
+          subtotal += itemTotal;
+        });
+        const gst = Math.round(subtotal * 0.18);
+        const total = subtotal + gst;
+        return { subtotal: Math.round(subtotal), gst, total };
+      }
+
+      // Render items form
+      function renderItems() {
+        if (!items) return;
+        const container = document.getElementById("itemsContainer");
+        container.innerHTML = items
+          .map(
+            (item) => `
+                      <div class="item-card">
+                          <div class="item-grid">
+                              <div class="form-group">
+                                  <label>Restaurant/Cafe Name *</label>
+                                  <input type="text" value="${item.clientName}" onchange="updateItem(${item.id}, 'clientName', this.value)">
+                              </div>
+                              <div class="form-group">
+                                  <label>Restaurant Type *</label>
+                                  <select onchange="handleRestaurantTypeChange(${item.id}, this.value)">
+                                      <option value="Standalone" ${item.restaurantType === "Standalone" ? "selected" : ""}>Standalone</option>
+                                      <option value="Multiple" ${item.restaurantType === "Multiple" ? "selected" : ""}>Multiple Chain</option>
+                                  </select>
+                              </div>
+                              <div class="form-group">
+                                  <label>Type *</label>
+                                  <select onchange="updateItem(${item.id}, 'type', this.value)">
+                                      <option value="Cafe" ${item.type === "Cafe" ? "selected" : ""}>Cafe</option>
+                                      <option value="Restaurant" ${item.type === "Restaurant" ? "selected" : ""}>Restaurant</option>
+                                      <option value="Outlet" ${item.type === "Outlet" ? "selected" : ""}>Outlet</option>
+                                  </select>
+                              </div>
+                              ${
+                                item.restaurantType === "Multiple"
+                                  ? `
+                              <div class="form-group">
+                                  <label>Number of Branches *</label>
+                                  <input type="number" value="${item.branches || 1}" onchange="updateItem(${item.id}, 'branches', parseInt(this.value) || 1)" min="1">
+                              </div>
+                              `
+                                  : ""
+                              }
+                              <div class="form-group">
+                                  <label>Plan</label>
+                                  <select onchange="changePlan(${item.id}, this.value)">
+                                      <option value="Standard" ${item.plan === "Standard" ? "selected" : ""}>Standard</option>
+                                      <option value="Pro" ${item.plan === "Pro" ? "selected" : ""}>Pro</option>
+                                  </select>
+                              </div>
+                              <div class="form-group">
+                                  <label>Payment Term</label>
+                                  <select onchange="updateItem(${item.id}, 'term', this.value); updateSummary();">
+                                      <option value="1m" ${item.term === "1m" ? "selected" : ""}>1 Month</option>
+                                      <option value="6m" ${item.term === "6m" ? "selected" : ""}>6 Months</option>
+                                      <option value="12m" ${item.term === "12m" ? "selected" : ""}>12 Months</option>
+                                  </select>
+                              </div>
+                              <div class="form-group">
+                                  <label>Discount %</label>
+                                  <input type="number" value="${item.discount}" onchange="updateItem(${item.id}, 'discount', parseInt(this.value) || 0)" min="0" max="100">
+                              </div>
+                              <div class="form-group">
+                                  <label style="display: flex; align-items: center; gap: 8px;">
+                                      <input type="checkbox" ${item.trial ? "checked" : ""} onchange="updateItem(${item.id}, 'trial', this.checked)">
+                                      Free Trial
+                                  </label>
+                              </div>
+                          </div>
+                          ${items.length > 1 ? `<button class="delete-button" onclick="deleteItem(${item.id})">Delete Item</button>` : ""}
+                      </div>
+                  `,
+          )
+          .join("");
+      }
+
+      // Update a single field on an item.
+      // Does NOT re-render the item rows — callers that need a visual
+      // refresh (e.g. changePlan) call renderItems() themselves.
+      function updateItem(id, field, value) {
+        const item = items.find((i) => i.id === id);
+        if (item) {
+          item[field] = value;
+          updateSummary();
+        }
+      }
+
+      function handleRestaurantTypeChange(id, value) {
+        const item = items.find((i) => i.id === id);
+        if (!item) return;
+
+        item.restaurantType = value;
+
+        // Always reset branches to 1 when switching to Standalone.
+        // Keep existing branch count when switching to Multiple (or default to 1).
+        if (value !== "Multiple") {
+          item.branches = 1;
+        } else if (!item.branches || item.branches < 1) {
+          item.branches = 1;
+        }
+
+        // One render pass — re-draws the item grid (shows/hides branches input)
+        // then recalculates the summary numbers.
+        renderItems();
+        updateSummary();
+      }
+
+      // Change plan
+      function changePlan(id, plan) {
+        const item = items.find((i) => i.id === id);
+        if (item) {
+          item.plan = plan;
+          renderItems();
+          updateSummary();
+        }
+      }
+
+      // Add item
+      function addItem() {
+        const newId = Math.max(...items.map((i) => i.id), 0) + 1;
+        items.push({
+          id: newId,
+          clientName: "",
+          restaurantType: "Standalone",
+          type: "Restaurant",
+          branches: 1,
+          plan: "Standard",
+          term: "12m",
+          discount: 0,
+          trial: false,
+          finalPrice: 0,
+        });
+        renderItems();
+        updateSummary();
+      }
+
+      // Delete item
+      function deleteItem(id) {
+        if (items.length > 1) {
+          items = items.filter((i) => i.id !== id);
+          renderItems();
+          updateSummary();
+        }
+      }
+
+      // Update summary (numbers only — does NOT re-render item rows)
+      function updateSummary() {
+        const { subtotal, gst, total } = calculateTotals();
+        document.getElementById("summarySubtotal").textContent =
+          formatCurrency(subtotal);
+        document.getElementById("summaryGST").textContent = formatCurrency(gst);
+        document.getElementById("summaryTotal").textContent =
+          formatCurrency(total);
+        document.getElementById("itemCount").textContent = items.length;
+        document.getElementById("totalValue").textContent =
+          formatCurrency(total);
+        // Note: renderInvoice() is intentionally NOT called here.
+        // It is called explicitly from switchTab('preview') to avoid
+        // thrashing the DOM on every keystroke in the form.
+      }
+
+      // Switch tab
+      function switchTab(tab) {
+        document.getElementById("formTab").classList.add("hidden");
+        document.getElementById("previewTab").classList.add("hidden");
+
+        document.querySelectorAll(".tab-button").forEach((btn) => {
+          btn.classList.remove("active");
+        });
+
+        if (tab === "form") {
+          document.getElementById("formTab").classList.remove("hidden");
+          document.querySelectorAll(".tab-button")[0].classList.add("active");
+        } else {
+          document.getElementById("previewTab").classList.remove("hidden");
+          document.querySelectorAll(".tab-button")[1].classList.add("active");
+
+          setTimeout(() => {
+            renderInvoice();
+          }, 100);
+        }
+      }
+
+      // Initialize signature pads
+      function initSignaturePads() {
+        setTimeout(() => {
+          const canvas1 = document.getElementById("signaturePad1");
+          const canvas2 = document.getElementById("signaturePad2");
+
+          if (canvas1 && !signaturePad1) {
+            signaturePad1 = new SignaturePad(canvas1);
+          }
+          if (canvas2 && !signaturePad2) {
+            signaturePad2 = new SignaturePad(canvas2);
+          }
+        }, 100);
+      }
+
+      // Clear signature
+      function clearSignature(padId) {
+        if (padId === "signaturePad1" && signaturePad1) {
+          signaturePad1.clear();
+        } else if (padId === "signaturePad2" && signaturePad2) {
+          signaturePad2.clear();
+        }
+      }
+
+      // Render invoice
+      function renderInvoice() {
+        const clientName = getValue("clientName");
+        const gstNumber = getValue("gstNumber");
+        const address = getValue("clientAddress");
+        const invoiceNo = getValue("invoiceNo");
+        const invoiceDate = getValue("invoiceDate");
+        const dueDate = getValue("dueDate");
+
+        const sigEl = document.getElementById("sigImg");
+
+        const sig1 = sigEl && sigEl.style.display === "block" ? sigEl.src : "";
+        const sig2 = "";
+
+        let rows = "";
+        let subtotal6 = 0;
+        let subtotal12 = 0;
+
+        items.forEach((item) => {
+          const basePrice = priceConfigs[item.plan][item.term];
+
+          const branches =
+            item.restaurantType === "Multiple"
+              ? parseInt(item.branches || 1)
+              : 1;
+
+          const discount = item.discount || 0;
+          const finalPrice = basePrice - (basePrice * discount) / 100;
+
+          const price6MonthPer = Math.round(finalPrice);
+          const total6Month = price6MonthPer * 6 * branches;
+
+          const price12MonthPer = Math.round(finalPrice * 0.75);
+          const total12Month = price12MonthPer * 12 * branches;
+
+          subtotal6 += total6Month;
+          subtotal12 += total12Month;
+
+          rows += `
+      <tr>
+        <td style="font-size: 10px;">
+          <b>${item.clientName || ""}</b><br>
+          ${item.restaurantType || ""}
+        </td>
+        <td>${branches}</td>
+        <td>₹${price6MonthPer.toLocaleString()}</td>
+        <td>₹${total6Month.toLocaleString()}</td>
+        <td>₹${price12MonthPer.toLocaleString()}</td>
+        <td>₹${total12Month.toLocaleString()}</td>
+      </tr>
+    `;
+        });
+
+        const gst6 = subtotal6 * 0.18;
+        const gst12 = subtotal12 * 0.18;
+        const total6 = subtotal6 + gst6;
+        const total12 = subtotal12 + gst12;
+
+        document.getElementById("invoiceContent").innerHTML = `
+    <div class="invoice-header">
+      <div>
+        <div class="invoice-brand">BRIDGE</div>
+        <div class="invoice-tagline">Menu Intelligence</div>
+        <div class="invoice-company">Fitshield Dietfood Pvt Ltd</div>
+        <div class="invoice-gstin">GSTIN: 24AAACF1234A1Z5</div>
+        <div class="invoice-cin">CIN: U74999GJ2023PTC141234</div>
+        <div class="invoice-address">Ahmedabad, Gujarat – 380001</div>
+        <div class="invoice-contact">support@bridge.fitshield.in | +91 98765 43210</div>
+      </div>
+
+      <div style="text-align:right">
+        <div class="invoice-title">INVOICE</div>
+        <div class="invoice-no">Invoice No: <span class="invoice-no-value">${invoiceNo}</span></div>
+        <div class="invoice-date">Date: <span class="invoice-date-value">${invoiceDate}</span></div>
+        <div class="invoice-due-date">Due Date: <span class="invoice-due-date-value">${dueDate}</span></div>
+        <div class="invoice-plan">Plan: <span class="invoice-plan-value">Standard</span></div>
+      </div>
+    </div>
+
+    <div class="green-line"></div>
+
+    <div class="invoice-billed-to">
+      <div>
+        <b><span class="invoice-billed-to-text">BILLED TO</span></b><br><br>
+        <span class="invoice-billed-to-name">${clientName}</span><br>
+        <span class="invoice-gst-number">GST: ${gstNumber}</span><br>
+        <span class="invoice-billto-address">${address}</span>
+      </div>
+
+      <div class="trial-box">
+        <b>14-Day Money-Back Trial <span class="invoice-trial-name">(${clientName})</span></b><br>
+        <span class="trial-box-subtitle">Trial valid from date of activation</span>
+      </div>
+    </div>
+
+    <div class="section-title">SUBSCRIPTION DETAILS — STANDARD PLAN</div>
+
+    <table class="subscription-table">
+      <thead>
+        <tr>
+          <th  style="background: #EDEDED; color: black; font-size: 12px">Client / Restaurant</th>
+          <th  style="background: #EDEDED; color: black; font-size: 12px">Branches</th>
+          <th  style="background: #EDEDED; color: black; font-size: 12px">6 months <span style="color: #1a8f3c">₹ / Month</span></th>
+          <th  style="background: #EDEDED; color: black; font-size: 12px">6M Total</th>
+          <th  style="background: #EDEDED; color: black; font-size: 12px">Yearly <span style="color: #1a8f3c">₹ / Month</span></th>
+          <th  style="background: #EDEDED; color: black; font-size: 12px">12M Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows}
+        <tr>
+          <td colspan="3"><b>Subtotal (Base Price)</b></td>
+          <td>₹${subtotal6.toLocaleString()}</td>
+          <td></td>
+          <td>₹${subtotal12.toLocaleString()}</td>
+        </tr>
+        <tr>
+          <td colspan="3"><b>GST @ 18%</b></td>
+          <td>₹${gst6.toLocaleString()}</td>
+          <td></td>
+          <td>₹${gst12.toLocaleString()}</td>
+        </tr>
+        <tr class="total-row">
+          <td colspan="3">GRAND TOTAL (incl. GST)</td>
+          <td>₹${total6.toLocaleString()}</td>
+          <td></td>
+          <td>₹${total12.toLocaleString()}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table class="subscription-table">
+      <thead>
+        <tr>
+          <th style="background: #EDEDED; color: black; font-size: 10px;"><b>Standard Plan</b></th>
+          <th style="background: #EDEDED; color: black; font-size: 10px;"><b>Pro Plan</b> <span style="color: #1fa64a">(₹2,499/month vs ₹1,499 Std)</span></th>
+        </tr>  
+      </thead>  
+      <tbody>
+      <tr>
+        <td>
+          <div>• Up to 100 menu items</div>
+          <div>• Basic Nutritional Tagging</div>
+          <div>• 3 FSSAI approved marketing tags</div>
+          <div>• 1 Physical QR code</div>
+        </td>
+        <td>
+          • Unlimited menu items vs 100 item cap<br>
+          • Full Nutritional Tagging + AI Chatbot for real-time guest queries<br>
+          • Revenue Opportunity Reports + Live Edit Dashboard to maximise yield Monthly<br>
+          • up to 10 Physical QR code delivery<br>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+
+    <div style="color: #9e9e9e; font-size: 10px; font-weight: 600">Note: Dosa Charcol eligible for 14-day money-back trial.</div>
+
+    <div class="payment-section">
+      <div style="border-bottom: 1px solid #000; padding-bottom: 20px;">
+        <table>
+          <thead>
+            <tr>
+              <th>PAYMENT DETAILS</th>
+            </tr>  
+          </thead>
+          <tbody>
+            <tr>
+              <td class="payment-details-label">Bank</td>
+              <td class="payment-details-value">Bank Of Baroda</td>
+            </tr>
+            <tr>
+              <td class="payment-details-label">Account Name</td>
+              <td class="payment-details-value">Fitshield Dietfood Pvt. Ltd.</td>
+            </tr>
+            <tr>
+              <td class="payment-details-label">Account No</td>
+              <td class="payment-details-value">27370200001484</td>
+            </tr>
+            <tr>
+              <td class="payment-details-label">IFSC Code</td>
+              <td class="payment-details-value">BARB0SATAHM <span style="font-weight: 400">(5th character is Zero)</span></td>
+            </tr>
+            <tr>
+              <td class="payment-details-label">Branch</td>
+              <td class="payment-details-value">Satellite Road, Ahmedabad</td>
+            </tr>
+            <tr>
+              <td class="payment-details-label">Account Type</td>
+              <td class="payment-details-value">Current Account</td>
+            </tr>
+            <tr>
+              <td class="payment-details-label">UPI ID</td>
+              <td class="payment-details-value">Fitsh95126484@barodampay</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="signature-box">
+        <b>FOR FITSHIELD DIETFOOD PVT. LTD.</b><br><br>
+        <div style="display: flex; justify-content: center; border-bottom: 2px solid #888888; margin-bottom: 4px; padding-bottom: 4px; max-width: 115px;">
+          ${sig1 ? `<img src="${sig1}" height="60"><br>` : ""}
+          ${sig2 ? `<img src="${sig2}" height="60"><br>` : ""}
+        </div>
+        <div style="margin-bottom: 2px"><b>Authorised Signatory</b></div>
+        <div style="margin-bottom: 6px">BRIDGE | FITSHIELD</div>
+        <div style="font-weight: 500; border-bottom: 1px solid #000; padding-bottom: 4px;">Date: ${invoiceDate}</div>
+        <div class="footer-text">This is a computer-generated invoice.<br>
+        Terms: Payment due within 7 days of invoice date.<br>
+        Prices in INR inclusive of applicable taxes.
+        </div>
+      </div>
+    </div>
+
+    <div style="font-style: italic; margin-top: 4px;">
+      [ QR Code for UPI Payment ]  
+    </div>
+    <div style="font-size: 9px;">
+      Scan to pay via any UPI app  
+    </div>
+    <div class="qr-box">
+      <img src="assets/image.png" width="120">
+    </div>
+  `;
+      }
+
+      function getSelectedPlan() {
+        let plan = "Standard";
+        let term = "12 Months";
+
+        // If you have plan selector
+        const termBtn = document.querySelector(".term-button.active");
+        if (termBtn) {
+          term = termBtn.innerText.includes("6") ? "6 Months" : "12 Months";
+        }
+
+        return plan + " - " + term;
+      }
+
+      const GOOGLE_SHEET_URL =
+        "https://script.google.com/macros/s/AKfycbyMgYT0LhZF-Qhj016L7cwvFboZsmmf8DEJdXEk3EX-e4Z_muwVIZDcVyeKqHrn3Vhx/exec";
+
+      function saveToGoogleSheet() {
+        var invoiceNo = document.getElementById("invoiceNo").value;
+        var invoiceDate = document.getElementById("invoiceDate").value;
+        var clientName = document.getElementById("clientName").value;
+        var gstNumber = document.getElementById("gstNumber").value;
+        var plan = getSelectedPlan();
+
+        var subtotal = document
+          .getElementById("summarySubtotal")
+          .innerText.replace("₹", "")
+          .replace(/,/g, "")
+          .trim();
+        var gst = document
+          .getElementById("summaryGST")
+          .innerText.replace("₹", "")
+          .replace(/,/g, "")
+          .trim();
+        var total = document
+          .getElementById("summaryTotal")
+          .innerText.replace("₹", "")
+          .replace(/,/g, "")
+          .trim();
+
+        var createdBy = localStorage.getItem("loggedInUser") || "Admin";
+
+        var data = {
+          invoiceNo: invoiceNo,
+          date: invoiceDate,
+          clientName: clientName,
+          gstNumber: gstNumber,
+          plan: plan,
+          subtotal: subtotal,
+          gst: gst,
+          total: total,
+          createdBy: createdBy,
+        };
+
+        // Use 'no-cors' mode is NOT needed — Apps Script handles CORS
+        // The key fix: do NOT set Content-Type header (let browser use default)
+        fetch(GOOGLE_SHEET_URL, {
+          method: "POST",
+          body: JSON.stringify(data),
+        })
+          .then(function (res) {
+            return res.text();
+          })
+          .then(function (response) {
+            console.log("Sheet response:", response);
+          })
+          .catch(function (err) {
+            console.error("Sheet save error:", err);
+          });
+      }
+
+      // Generate PDF
+      function generatePDF() {
+        const sigVisible =
+          document.getElementById("sigImg").style.display === "block";
+
+        if (!sigVisible) {
+          alert("Admin PIN required!");
+          return;
+        }
+
+        renderInvoice();
+        saveToGoogleSheet();
+
+        setTimeout(() => {
+          const element = document.getElementById("invoiceContent");
+          const invoiceNo = document.getElementById("invoiceNo").value;
+          const filename = `BRIDGE_Invoice_${invoiceNo}.pdf`;
+
+          html2pdf()
+            .set({
+              margin: 0,
+              filename: filename,
+              image: { type: "jpeg", quality: 1 },
+              html2canvas: { scale: 2, useCORS: true },
+              jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+              pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+            })
+            .from(element)
+            .save()
+            .then(() => {
+              setTimeout(() => {
+                location.reload();
+              }, 1000);
+            });
+        }, 500);
+      }
+
+      // New invoice
+      function newInvoice() {
+        document.getElementById("clientName").value = "";
+        document.getElementById("gstNumber").value = "";
+        document.getElementById("clientAddress").value = "";
+        document.getElementById("invoiceNotes").value = "";
+        const sig1 = document.getElementById("sigImg1").src;
+        const sig2 = document.getElementById("sigImg2").src;
+
+        items = [];
+        renderItems();
+        updateSummary();
+        switchTab("form");
+      }
+
+      function verifyPin() {
+        const pin = document.getElementById("adminPin").value;
+        const sigImg = document.getElementById("sigImg");
+
+        if (pin === adminUsers.adminA.pin) {
+          sigImg.src = adminUsers.adminA.signature;
+          sigImg.style.display = "block";
+        } else if (pin === adminUsers.adminB.pin) {
+          sigImg.src = adminUsers.adminB.signature;
+          sigImg.style.display = "block";
+        } else {
+          sigImg.style.display = "none";
+        }
+      }
+
+      // Initialize
+      document.getElementById("invoiceNo").value = generateEncodedInvoiceNo();
+      document.getElementById("invoiceDate").value = getCurrentDate();
+      document.getElementById("dueDate").value = getDueDate();
+
+      renderItems();
+      updateSummary();
     </script>
-</body>
+  </body>
 </html>
